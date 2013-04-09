@@ -15,13 +15,33 @@ public:
 
 	Image(int w, int h): w(w), h(h), buffer(w * h) { }
 
-	glm::vec3& operator()(int x, int y) {
-		return buffer[y * w + x];
-	}
+	glm::vec3 sample(float u, float v) {
+		return get(u / w, v / h);
+	};
 
-	const glm::vec3& operator()(int x, int y) const {
-		return buffer[y * w + x];
-	}
+	glm::vec3 sampleClamp(float u, float v) {
+		u = u < 0 ? 0 : (u > 1.0 ? 1.0 : u);
+		v = v < 0 ? 0 : (v > 1.0 ? 1.0 : v);
+		return get(u / w, v / h);
+	};
+
+	glm::vec3 sampleRepeat(float u, float v) {
+		return get((u / w) % w, (v / h) % h);
+	};
+
+	glm::vec3 get(int x, int y) {
+		return data[x + y * w];
+	};
+
+	glm::vec3 getClamp(int x, int y) {
+		x = x < 0 ? 0 : (x > w ? w : x);
+		y = y < 0 ? 0 : (v > h ? h : y);
+		return get(x, y);
+	};
+
+	glm::vec3 getRepeat(int x, int y) {
+		return get(x % w, y % h);
+	};
 
 	void filter(FilterFunction func) {
 		for (int y = 0; y < h; ++y) {
