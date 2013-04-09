@@ -8,45 +8,47 @@
 #define GLM_FORCE_CXX11
 #include <glm/glm.hpp>
 
+using glm::vec3;
+
 class Image {
 public:
-	typedef std::function<glm::vec3(int, int, glm::vec3)> FilterFunction;
-	typedef std::function<glm::vec3(int, int)> GeneratorFunction;
+	typedef std::function<vec3(int, int, vec3)> FilterFunction;
+	typedef std::function<vec3(int, int)> GeneratorFunction;
 
 	Image(int w, int h): w(w), h(h), buffer(w * h) { }
 
-	glm::vec3 sample(float u, float v) {
+	vec3 sample(float u, float v) {
 		return get(u / w, v / h);
 	};
 
-	glm::vec3 sampleClamp(float u, float v) {
+	vec3 sampleClamp(float u, float v) {
 		u = u < 0 ? 0 : (u > 1.0 ? 1.0 : u);
 		v = v < 0 ? 0 : (v > 1.0 ? 1.0 : v);
 		return get(u / w, v / h);
 	};
 
-	glm::vec3 sampleRepeat(float u, float v) {
-		return get((u / w) % w, (v / h) % h);
+	vec3 sampleRepeat(float u, float v) {
+		return get(int(u / w) % w, int(v / h) % h);
 	};
 
-	glm::vec3 get(int x, int y) {
-		return data[x + y * w];
+	vec3 get(int x, int y) {
+		return buffer[x + y * w];
 	};
 
-	glm::vec3 getClamp(int x, int y) {
+	vec3 getClamp(int x, int y) {
 		x = x < 0 ? 0 : (x > w ? w : x);
-		y = y < 0 ? 0 : (v > h ? h : y);
+		y = y < 0 ? 0 : (y > h ? h : y);
 		return get(x, y);
 	};
 
-	glm::vec3 getRepeat(int x, int y) {
+	vec3 getRepeat(int x, int y) {
 		return get(x % w, y % h);
 	};
 
 	void filter(FilterFunction func) {
 		for (int y = 0; y < h; ++y) {
 			for (int x = 0; x < w; ++x) {
-				glm::vec3& color = buffer[y * w + x];
+				vec3& color = buffer[y * w + x];
 				color = func(x, y, color);
 			}
 		}
@@ -63,12 +65,12 @@ public:
 	void writeTGA(std::string filepath = "out.tga") {
 		std::ofstream tgaout(filepath.c_str(), std::ios::binary);
 		char tga_header_part1[] = {
-		  0x00,  // No id field
-		  0x00,  // No palette
-		  0x02,  // 2 = Uncompressed true-color
-		  0x00, 0x00, 0x00, 0x00, 0x00,  // Palette stuff (not used)
-		  0x00, 0x00,  // X-origin
-		  0x00, 0x00  // Y-origin
+			0x00,  // No id field
+			0x00,  // No palette
+			0x02,  // 2 = Uncompressed true-color
+			0x00, 0x00, 0x00, 0x00, 0x00,  // Palette stuff (not used)
+			0x00, 0x00,  // X-origin
+			0x00, 0x00  // Y-origin
 		};
 		tgaout.write(tga_header_part1, sizeof(tga_header_part1));
 		// 16-bit width and height (little-endian)
@@ -81,7 +83,7 @@ public:
 		// Image data
 		for (int y = h-1; y >= 0; --y) {
 			for (int x = 0; x < w; ++x) {
-				const glm::vec3& pix = (*this)(x, y);
+				const vec3& pix = get(x, y);
 				tgaout << static_cast<char>(pix.b * 255);
 				tgaout << static_cast<char>(pix.g * 255);
 				tgaout << static_cast<char>(pix.r * 255);
@@ -90,5 +92,5 @@ public:
 	}
 
 	int w, h;
-	std::vector<glm::vec3> buffer;
+	std::vector<vec3> buffer;
 };
