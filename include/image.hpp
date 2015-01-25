@@ -19,31 +19,31 @@ public:
 
 	vec3 sample(float u, float v) {
 		return get(u / w, v / h);
-	};
+	}
 
 	vec3 sampleClamp(float u, float v) {
 		u = u < 0 ? 0 : (u > 1.0 ? 1.0 : u);
 		v = v < 0 ? 0 : (v > 1.0 ? 1.0 : v);
 		return get(u / w, v / h);
-	};
+	}
 
 	vec3 sampleRepeat(float u, float v) {
 		return get(int(u / w) % w, int(v / h) % h);
-	};
+	}
 
 	vec3 get(int x, int y) {
 		return buffer[x + y * w];
-	};
+	}
 
 	vec3 getClamp(int x, int y) {
 		x = x < 0 ? 0 : (x > w ? w : x);
 		y = y < 0 ? 0 : (y > h ? h : y);
 		return get(x, y);
-	};
+	}
 
 	vec3 getRepeat(int x, int y) {
 		return get(x % w, y % h);
-	};
+	}
 
 	void filter(FilterFunction func) {
 		for (int y = 0; y < h; ++y) {
