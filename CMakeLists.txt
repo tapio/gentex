@@ -37,9 +37,10 @@ include_directories(lib)
 include_directories(include)
 
 # Files
-file(GLOB SOURCE_FILES "tests/*.cpp")
+file(GLOB SOURCE_FILES "src/*.cpp")
 file(GLOB HEADER_FILES "include/*.hpp")
 set(SOURCES ${SOURCE_FILES} ${HEADER_FILES})
 
-add_executable(${EXENAME} ${SOURCES})
+add_executable(basic "tests/basic.cpp" ${SOURCES})
+add_executable(gentex "tests/tool.cpp" ${SOURCES})
 #target_link_libraries(${EXENAME} ${LIBS})
