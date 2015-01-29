@@ -12,6 +12,8 @@ typedef glm::vec4 Color;
 
 typedef std::function<Color(Color, Color)> CompositeFunction;
 
+inline Color saturate(const Color c) { return clamp(c, 0.0f, 1.0f); }
+
 class Image {
 public:
 	typedef std::function<Color(int, int, Color)> FilterFunction;
@@ -94,10 +96,10 @@ public:
 		// Image data
 		for (int y = h-1; y >= 0; --y) {
 			for (int x = 0; x < w; ++x) {
-				const Color& pix = get(x, y);
-				tgaout << static_cast<char>(pix.b * 255);
-				tgaout << static_cast<char>(pix.g * 255);
-				tgaout << static_cast<char>(pix.r * 255);
+				const Color pix = saturate(get(x, y));
+				tgaout << static_cast<unsigned char>(pix.b * 255);
+				tgaout << static_cast<unsigned char>(pix.g * 255);
+				tgaout << static_cast<unsigned char>(pix.r * 255);
 			}
 		}
 	}
