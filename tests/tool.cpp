@@ -36,15 +36,17 @@ struct Command {
 std::map<std::string, CommandFunction> s_cmds = {
 	{ "sinx", [](Image& dst, CompositeFunction op, const Json& params) {
 		float freq = params["freq"].number_value();
-		dst.composite([freq](int x, int) {
-			return vec4(std::sin(x) * freq);
+		float offset = params["offset"].number_value();
+		dst.composite([freq, offset](int x, int) {
+			return vec4(std::sin((x + offset) * freq));
 		}, op);
 
 	}},
 	{ "siny", [](Image& dst, CompositeFunction op, const Json& params) {
 		float freq = params["freq"].number_value();
-		dst.composite([freq](int, int y) {
-			return vec4(std::sin(y) * freq);
+		float offset = params["offset"].number_value();
+		dst.composite([freq, offset](int, int y) {
+			return vec4(std::sin((y + offset) * freq));
 		}, op);
 	}}
 };
