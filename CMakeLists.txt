@@ -1,8 +1,6 @@
 project(GenTex)
-cmake_minimum_required(VERSION 2.6)
-cmake_policy(VERSION 2.6)
-
-set(EXENAME "gentex")
+cmake_minimum_required(VERSION 2.8)
+cmake_policy(VERSION 2.8)
 
 # Avoid source tree pollution
 if(CMAKE_SOURCE_DIR STREQUAL CMAKE_BINARY_DIR)
@@ -39,8 +37,8 @@ include_directories(include)
 # Files
 file(GLOB SOURCE_FILES "src/*.cpp")
 file(GLOB HEADER_FILES "include/*.hpp")
-set(SOURCES ${SOURCE_FILES} ${HEADER_FILES})
+file(GLOB_RECURSE LIB_FILES "lib/*.cpp")
+set(SOURCES ${SOURCE_FILES} ${HEADER_FILES} ${LIB_FILES})
 
 add_executable(basic "tests/basic.cpp" ${SOURCES})
 add_executable(gentex "tests/tool.cpp" ${SOURCES})
-#target_link_libraries(${EXENAME} ${LIBS})

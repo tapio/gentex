@@ -5,31 +5,33 @@
 #include <sstream>
 #include <cctype>
 
+#include "gentex.hpp"
+#include "json11/json11.hpp"
+
+using namespace gentex;
+using namespace json11;
+
 std::string readFile(const std::string& path) {
 	std::ifstream f(path);
 	return std::string(std::istreambuf_iterator<char>(f), std::istreambuf_iterator<char>());
 }
 
-void eatWhitespace(char* &ptr) {
-	while (isspace(*ptr)) ++ptr;
+void panic(const char* msg) {
+	std::cout << msg << std::endl;
+	exit(1);
 }
 
-std::string readToken(char* &ptr) {
-	std::string token;
-	while (isalnum(*ptr)) { token += *ptr; ++ptr; };
-	ptr++;
-	return token;
-}
+int main(int /*argc*/, char** argv) {
+	std::string err;
+	Json spec = Json::parse(readFile(argv[1]), err);
+	if (!err.empty())
+		panic(err.c_str());
 
-int main(int argc, char** argv) {
-	std::string source = readFile(argv[1]);
-	char* ptr = &source[0];
-	while (*ptr) {
-		std::cout << "before eat " << (ptr - &source[0]) << std::endl;
-		eatWhitespace(ptr);
-		std::cout << "before token " << (ptr - &source[0]) << std::endl;
-		std::cout << readToken(ptr) << std::endl;
-	}
+	int w = spec["size"][0].int_value();
+	int h = spec["size"][1].int_value();
+	Image tex(w, h);
+	solidColor(tex, vec3(0.0, 0.2, 0.3));
+	tex.writeTGA(spec["out"].string_value());
 
 	return 0;
 }
