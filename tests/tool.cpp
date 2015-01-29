@@ -70,11 +70,13 @@ void panic(const char* msg) {
 	exit(1);
 }
 
-int main(int /*argc*/, char** argv) {
+bool doFile(const std::string& path) {
 	std::string err;
-	Json spec = Json::parse(readFile(argv[1]), err);
-	if (!err.empty())
-		panic(err.c_str());
+	Json spec = Json::parse(readFile(path), err);
+	if (!err.empty()) {
+		std::cerr << err << std::endl;
+		return false;
+	}
 
 	int w = spec["size"][0].int_value();
 	int h = spec["size"][1].int_value();
@@ -93,6 +95,12 @@ int main(int /*argc*/, char** argv) {
 	}
 
 	tex.writeTGA(spec["out"].string_value());
+	return true;
+}
+
+int main(int /*argc*/, char** argv) {
+	if (!doFile(argv[1]))
+		return 1;
 
 	return 0;
 }
