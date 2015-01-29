@@ -8,7 +8,7 @@
 #define GLM_FORCE_CXX11
 #include <glm/glm.hpp>
 
-typedef glm::vec4 Color;
+typedef glm::vec3 Color;
 
 typedef std::function<Color(Color, Color)> CompositeFunction;
 
