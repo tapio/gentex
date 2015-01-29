@@ -34,6 +34,8 @@ inline Color parseTint(const Json& params) {
 }
 
 inline void msleep(int ms) { std::this_thread::sleep_for(std::chrono::milliseconds(ms)); }
+inline float rnd() { return rand() / (float)RAND_MAX; }
+
 
 typedef std::function<void(Image&, CompositeFunction, const Json&)> CommandFunction;
 
@@ -58,6 +60,12 @@ std::map<std::string, CommandFunction> s_cmds = {
 		Color tint = parseTint(params);
 		dst.composite([freq, offset, tint](int, int y) {
 			return Color(std::sin((y + offset) * freq)) * tint;
+		}, op);
+	}},
+	{ "noise", [](Image& dst, CompositeFunction op, const Json& params) {
+		Color tint = parseTint(params);
+		dst.composite([tint](int, int) {
+			return Color(rnd()) * tint;
 		}, op);
 	}}
 };
