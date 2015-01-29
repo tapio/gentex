@@ -17,13 +17,13 @@ struct Op {
 };
 
 const std::vector<Op> s_ops = {
-	{ "set", [](vec4  , vec4 b) { return b; } },
-	{ "add", [](vec4 a, vec4 b) { return a + b; } },
-	{ "sub", [](vec4 a, vec4 b) { return a - b; } },
-	{ "mul", [](vec4 a, vec4 b) { return a * b; } },
-	{ "div", [](vec4 a, vec4 b) { return a / b; } },
-	{ "min", [](vec4 a, vec4 b) { return min(a, b); } },
-	{ "max", [](vec4 a, vec4 b) { return max(a, b); } },
+	{ "set", [](Color  , Color b) { return b; } },
+	{ "add", [](Color a, Color b) { return a + b; } },
+	{ "sub", [](Color a, Color b) { return a - b; } },
+	{ "mul", [](Color a, Color b) { return a * b; } },
+	{ "div", [](Color a, Color b) { return a / b; } },
+	{ "min", [](Color a, Color b) { return min(a, b); } },
+	{ "max", [](Color a, Color b) { return max(a, b); } },
 };
 
 typedef std::function<void(Image&, CompositeFunction, const Json&)> CommandFunction;
@@ -38,7 +38,7 @@ std::map<std::string, CommandFunction> s_cmds = {
 		float freq = params["freq"].number_value();
 		float offset = params["offset"].number_value();
 		dst.composite([freq, offset](int x, int) {
-			return vec4(std::sin((x + offset) * freq));
+			return Color(std::sin((x + offset) * freq));
 		}, op);
 
 	}},
@@ -46,7 +46,7 @@ std::map<std::string, CommandFunction> s_cmds = {
 		float freq = params["freq"].number_value();
 		float offset = params["offset"].number_value();
 		dst.composite([freq, offset](int, int y) {
-			return vec4(std::sin((y + offset) * freq));
+			return Color(std::sin((y + offset) * freq));
 		}, op);
 	}}
 };

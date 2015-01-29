@@ -8,49 +8,49 @@
 #define GLM_FORCE_CXX11
 #include <glm/glm.hpp>
 
-using glm::vec4;
+typedef glm::vec4 Color;
 
-typedef std::function<vec4(vec4, vec4)> CompositeFunction;
+typedef std::function<Color(Color, Color)> CompositeFunction;
 
 class Image {
 public:
-	typedef std::function<vec4(int, int, vec4)> FilterFunction;
-	typedef std::function<vec4(int, int)> GeneratorFunction;
+	typedef std::function<Color(int, int, Color)> FilterFunction;
+	typedef std::function<Color(int, int)> GeneratorFunction;
 
 	Image(int w, int h): w(w), h(h), buffer(w * h) { }
 
-	vec4 sample(float u, float v) {
+	Color sample(float u, float v) {
 		return get(u / w, v / h);
 	}
 
-	vec4 sampleClamp(float u, float v) {
+	Color sampleClamp(float u, float v) {
 		u = u < 0 ? 0 : (u > 1.0 ? 1.0 : u);
 		v = v < 0 ? 0 : (v > 1.0 ? 1.0 : v);
 		return get(u / w, v / h);
 	}
 
-	vec4 sampleRepeat(float u, float v) {
+	Color sampleRepeat(float u, float v) {
 		return get(int(u / w) % w, int(v / h) % h);
 	}
 
-	vec4 get(int x, int y) {
+	Color get(int x, int y) {
 		return buffer[x + y * w];
 	}
 
-	vec4 getClamp(int x, int y) {
+	Color getClamp(int x, int y) {
 		x = x < 0 ? 0 : (x > w ? w : x);
 		y = y < 0 ? 0 : (y > h ? h : y);
 		return get(x, y);
 	}
 
-	vec4 getRepeat(int x, int y) {
+	Color getRepeat(int x, int y) {
 		return get(x % w, y % h);
 	}
 
 	void filter(FilterFunction func) {
 		for (int y = 0; y < h; ++y) {
 			for (int x = 0; x < w; ++x) {
-				vec4& color = buffer[y * w + x];
+				Color& color = buffer[y * w + x];
 				color = func(x, y, color);
 			}
 		}
@@ -67,7 +67,7 @@ public:
 	void composite(GeneratorFunction func, CompositeFunction op) {
 		for (int y = 0; y < h; ++y) {
 			for (int x = 0; x < w; ++x) {
-				vec4& color = buffer[y * w + x];
+				Color& color = buffer[y * w + x];
 				color = op(color, func(x, y));
 			}
 		}
@@ -94,7 +94,7 @@ public:
 		// Image data
 		for (int y = h-1; y >= 0; --y) {
 			for (int x = 0; x < w; ++x) {
-				const vec4& pix = get(x, y);
+				const Color& pix = get(x, y);
 				tgaout << static_cast<char>(pix.b * 255);
 				tgaout << static_cast<char>(pix.g * 255);
 				tgaout << static_cast<char>(pix.r * 255);
@@ -103,5 +103,5 @@ public:
 	}
 
 	int w, h;
-	std::vector<vec4> buffer;
+	std::vector<Color> buffer;
 };
