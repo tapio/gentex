@@ -2,8 +2,8 @@
 #include <string>
 #include <iostream>
 #include <fstream>
-#include <sstream>
-#include <cctype>
+#include <chrono>
+#include <thread>
 
 #include "gentex.hpp"
 #include "json11/json11.hpp"
@@ -32,6 +32,8 @@ inline Color parseTint(const Json& params) {
 		return Color(arr[0].number_value(), arr[1].number_value(), arr[2].number_value());
 	} else return Color(1.0f);
 }
+
+inline void msleep(int ms) { std::this_thread::sleep_for(std::chrono::milliseconds(ms)); }
 
 typedef std::function<void(Image&, CompositeFunction, const Json&)> CommandFunction;
 
@@ -70,9 +72,9 @@ void panic(const char* msg) {
 	exit(1);
 }
 
-bool doFile(const std::string& path) {
+bool doScript(const std::string& text) {
 	std::string err;
-	Json spec = Json::parse(readFile(path), err);
+	Json spec = Json::parse(text, err);
 	if (!err.empty()) {
 		std::cerr << err << std::endl;
 		return false;
@@ -98,9 +100,35 @@ bool doFile(const std::string& path) {
 	return true;
 }
 
-int main(int /*argc*/, char** argv) {
-	if (!doFile(argv[1]))
-		return 1;
+int main(int argc, char** argv) {
+	std::string path;
+	bool watch = false;
+	for (int i = 1; i < argc; ++i) {
+		std::string arg = argv[i];
+		if (arg == "-w" || arg == "--watch") {
+			watch = true;
+		}
+		else path = arg;
+	}
+	if (path.empty())
+		panic("specify input file");
+
+	std::string text = readFile(path);
+
+	if (!watch) {
+		return doScript(text) ? 0 : 1;
+	}
+
+	while (true) {
+		msleep(500);
+		// TODO: This is very crappy way to detect changes
+		std::string newText = readFile(path);
+		if (text != newText) {
+			std::cout << "Regenerating..." << std::endl;
+			doScript(newText);
+			text = newText;
+		}
+	}
 
 	return 0;
 }
