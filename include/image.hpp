@@ -10,6 +10,8 @@
 
 using glm::vec4;
 
+typedef std::function<vec4(vec4, vec4)> CompositeFunction;
+
 class Image {
 public:
 	typedef std::function<vec4(int, int, vec4)> FilterFunction;
@@ -58,6 +60,15 @@ public:
 		for (int y = 0; y < h; ++y) {
 			for (int x = 0; x < w; ++x) {
 				buffer[y * w + x] = func(x, y);
+			}
+		}
+	}
+
+	void composite(GeneratorFunction func, CompositeFunction op) {
+		for (int y = 0; y < h; ++y) {
+			for (int x = 0; x < w; ++x) {
+				vec4& color = buffer[y * w + x];
+				color = op(color, func(x, y));
 			}
 		}
 	}

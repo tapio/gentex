@@ -11,8 +11,6 @@
 using namespace gentex;
 using namespace json11;
 
-typedef std::function<vec4(vec4, vec4)> CompositeFunction;
-
 struct Op {
 	std::string name;
 	CompositeFunction op;
@@ -28,6 +26,28 @@ const std::vector<Op> s_ops = {
 	{ "max", [](vec4 a, vec4 b) { return max(a, b); } },
 };
 
+typedef std::function<void(Image&, CompositeFunction, const Json&)> CommandFunction;
+
+struct Command {
+	std::string name;
+	CommandFunction cmd;
+};
+
+std::map<std::string, CommandFunction> s_cmds = {
+	{ "sinx", [](Image& dst, CompositeFunction op, const Json& params) {
+		float freq = params["freq"].number_value();
+		dst.composite([freq](int x, int) {
+			return vec4(std::sin(x) * freq);
+		}, op);
+
+	}},
+	{ "siny", [](Image& dst, CompositeFunction op, const Json& params) {
+		float freq = params["freq"].number_value();
+		dst.composite([freq](int, int y) {
+			return vec4(std::sin(y) * freq);
+		}, op);
+	}}
+};
 
 std::string readFile(const std::string& path) {
 	std::ifstream f(path);
@@ -55,6 +75,7 @@ int main(int /*argc*/, char** argv) {
 			if (!cmd[op.name].is_null()) {
 				const std::string& gen = cmd[op.name].string_value();
 				std::cout << "Applying " << gen << " with " << op.name << std::endl;
+				s_cmds[gen](tex, op.op, cmd);
 				break;
 			}
 		}
