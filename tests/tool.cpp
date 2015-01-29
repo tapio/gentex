@@ -26,6 +26,13 @@ const std::vector<Op> s_ops = {
 	{ "max", [](Color a, Color b) { return max(a, b); } },
 };
 
+inline Color parseTint(const Json& params) {
+	if (params["tint"].is_array()) {
+		const auto& arr = params["tint"].array_items();
+		return Color(arr[0].number_value(), arr[1].number_value(), arr[2].number_value());
+	} else return Color(1.0f);
+}
+
 typedef std::function<void(Image&, CompositeFunction, const Json&)> CommandFunction;
 
 struct Command {
@@ -37,16 +44,18 @@ std::map<std::string, CommandFunction> s_cmds = {
 	{ "sinx", [](Image& dst, CompositeFunction op, const Json& params) {
 		float freq = params["freq"].number_value();
 		float offset = params["offset"].number_value();
-		dst.composite([freq, offset](int x, int) {
-			return Color(std::sin((x + offset) * freq));
+		Color tint = parseTint(params);
+		dst.composite([freq, offset, tint](int x, int) {
+			return Color(std::sin((x + offset) * freq)) * tint;
 		}, op);
 
 	}},
 	{ "siny", [](Image& dst, CompositeFunction op, const Json& params) {
 		float freq = params["freq"].number_value();
 		float offset = params["offset"].number_value();
-		dst.composite([freq, offset](int, int y) {
-			return Color(std::sin((y + offset) * freq));
+		Color tint = parseTint(params);
+		dst.composite([freq, offset, tint](int, int y) {
+			return Color(std::sin((y + offset) * freq)) * tint;
 		}, op);
 	}}
 };
