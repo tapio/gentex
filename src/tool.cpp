@@ -58,20 +58,20 @@ std::map<std::string, CommandFunction> s_cmds = {
 		}, op);
 	}},
 	{ "sinx", [](Image& dst, CompositeFunction op, const Json& params) {
-		float freq = params["freq"].number_value();
+		float freq = params["freq"].number_value() * M_PI;
 		float offset = params["offset"].number_value();
 		Color tint = parseTint(params);
 		dst.composite([freq, offset, tint](int x, int) {
-			return Color(std::sin((x + offset) * freq)) * tint;
+			return std::sin((x + offset) * freq) * tint;
 		}, op);
 
 	}},
 	{ "siny", [](Image& dst, CompositeFunction op, const Json& params) {
-		float freq = params["freq"].number_value();
+		float freq = params["freq"].number_value() * M_PI;
 		float offset = params["offset"].number_value();
 		Color tint = parseTint(params);
 		dst.composite([freq, offset, tint](int, int y) {
-			return Color(std::sin((y + offset) * freq)) * tint;
+			return std::sin((y + offset) * freq) * tint;
 		}, op);
 	}},
 	{ "or", [](Image& dst, CompositeFunction op, const Json& params) {
