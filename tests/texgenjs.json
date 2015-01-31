@@ -1,0 +1,93 @@
+[
+{
+	"size": [ 256, 256 ],
+	"out": "ex01.tga",
+	"ops": [
+		{ "add": "xor", "tint": [ 1.0, 0.5, 0.7 ] },
+		{ "add": "sinx", "freq": 0.004, "tint": [ 0.25, 0.0, 0.0 ] },
+		{ "sub": "siny", "freq": 0.004, "tint": [ 0.25, 0.0, 0.0 ] },
+		{ "add": "sinx", "freq": 0.0065, "tint": [ 0.1, 0.5, 0.2 ] },
+		{ "add": "siny", "freq": 0.0065, "tint": [ 0.0, 0.4, 0.5 ] },
+		{ "add": "noise", "tint": [ 0.1, 0.1, 0.2 ] }
+	]
+},{
+	"size": [ 256, 256 ],
+	"out": "ex02.tga",
+	"ops": [
+		{ "add": "sinx", "freq": 0.03, "offset": -16, "tint": [ 0.1, 0.25, 0.5 ] },
+		{ "add": "siny", "freq": 0.03, "offset": -16, "tint": [ 0.1, 0.25, 0.5 ] },
+		{ "add": "const", "tint": [ 0.75, 0.5, 0.5 ] },
+		{ "add": "sinx", "freq": 0.03, "tint": [ 0.2, 0.2, 0.2 ] },
+		{ "add": "siny", "freq": 0.03, "tint": [ 0.2, 0.2, 0.2 ] },
+		{ "add": "noise", "tint": [ 0.1, 0.0, 0.0 ] },
+		{ "add": "noise", "tint": [ 0.0, 0.1, 0.0 ] },
+		{ "add": "noise", "tint": [ 0.0, 0.0, 0.1 ] }
+	]
+},{
+	"size": [ 256, 256 ],
+	"out": "ex03.tga",
+	"ops": [
+		{ "add": "sinx", "freq": 0.1 },
+		{ "mul": "sinx", "freq": 0.05 },
+		{ "mul": "sinx", "freq": 0.025 },
+		{ "mul": "siny", "freq": 0.1 },
+		{ "mul": "siny", "freq": 0.05 },
+		{ "mul": "siny", "freq": 0.025 },
+		{ "add": "sinx", "freq": 0.004, "tint": [ -0.25, 0.1, 0.6 ] }
+	]
+},{
+	"size": [ 256, 256 ],
+	"out": "ex04.tga",
+	"ops": [
+		{ "add": "xor" },
+		{ "mul": "or", "tint": [ 0.5, 0.8, 0.5 ] },
+		{ "mul": "sinx", "freq": 0.0312 },
+		{ "div": "siny", "freq": 0.0312 },
+		{ "add": "sinx", "freq": 0.004, "tint": [ 0.5, 0.0, 0.0 ] },
+		{ "add": "noise", "tint": [ 0.1, 0.1, 0.2 ] }
+	]
+},{
+	"size": [ 256, 256 ],
+	"out": "ex05.tga",
+	"ops": [
+		{ "add": "sinx", "freq": 0.01 },
+		{ "mul": "siny", "freq": 0.0075 },
+		{ "add": "sinx", "freq": 0.0225 },
+		{ "mul": "siny", "freq": 0.015 },
+		{ "add": "noise", "tint": [ 0.1, 0.1, 0.3 ] }
+	]
+},{
+	"size": [ 256, 256 ],
+	"out": "ex06.tga",
+	"ops": [
+		{ "add": "sinx", "freq": 0.05 },
+		{ "mul": "sinx", "freq": 0.08 },
+		{ "add": "siny", "freq": 0.05 },
+		{ "mul": "siny", "freq": 0.08 },
+		{ "div": "const", "tint": [ 1, 2, 1 ] },
+		{ "add": "sinx", "freq": 0.003, "tint": [ 0.5, 0.0, 0.0 ] }
+	]
+},{
+	"size": [ 256, 256 ],
+	"out": "ex07.tga",
+	"ops": [
+		{ "add": "sinx", "freq": 0.066 },
+		{ "add": "siny", "freq": 0.066 },
+		{ "mul": "sinx", "freq": 0.044, "offset": 32, "tint": [ 2, 2, 2 ] },
+		{ "mul": "siny", "freq": 0.044, "offset": 16, "tint": [ 2, 2, 2 ] },
+		{ "sub": "const", "tint": [ 0.5, 2, 4 ] }
+	]
+},{
+	"size": [ 256, 256 ],
+	"out": "ex08.tga",
+	"ops": [
+		{ "add": "sinx", "freq": 0.004 },
+		{ "mul": "siny", "freq": 0.004 },
+		{ "mul": "siny", "freq": 0.02, "offset": 32 },
+		{ "div": "sinx", "freq": 0.02, "tint": [ 8, 5, 4 ] },
+		{ "add": "noise", "tint": [ 0.1, 0.0, 0.0 ] },
+		{ "add": "noise", "tint": [ 0.0, 0.1, 0.0 ] },
+		{ "add": "noise", "tint": [ 0.0, 0.0, 0.1 ] }
+	]
+}
+]
