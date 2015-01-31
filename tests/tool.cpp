@@ -80,14 +80,9 @@ void panic(const char* msg) {
 	exit(1);
 }
 
-bool doScript(const std::string& text) {
-	std::string err;
-	Json spec = Json::parse(text, err);
-	if (!err.empty()) {
-		std::cerr << err << std::endl;
-		return false;
-	}
-
+bool doTexture(const Json& spec) {
+	const std::string& outfile = spec["out"].string_value();
+	std::cout << "Generating " << outfile << "..." << std::endl;
 	int w = spec["size"][0].int_value();
 	int h = spec["size"][1].int_value();
 	Image tex(w, h);
@@ -104,8 +99,26 @@ bool doScript(const std::string& text) {
 		}
 	}
 
-	tex.writeTGA(spec["out"].string_value());
+	tex.writeTGA(outfile);
 	return true;
+}
+
+bool doScript(const std::string& text) {
+	std::string err;
+	Json specs = Json::parse(text, err);
+	if (!err.empty()) {
+		std::cerr << err << std::endl;
+		return false;
+	}
+
+	if (specs.is_object())
+		return doTexture(specs);
+
+	bool allFine = true;
+	for (const auto& spec : specs.array_items())
+		allFine &= doTexture(spec);
+
+	return allFine;
 }
 
 int main(int argc, char** argv) {
@@ -124,7 +137,7 @@ int main(int argc, char** argv) {
 	if (!watch) {
 		int ret = 0;
 		for (const auto& path: paths) {
-			std::cout << "Generating " << path << "..." << std::endl;
+			std::cout << "Processing " << path << "..." << std::endl;
 			if (!doScript(readFile(path)))
 				ret++;
 		}
@@ -142,7 +155,7 @@ int main(int argc, char** argv) {
 		for (unsigned i = 0; i < paths.size(); ++i) {
 			std::string newText = readFile(paths[i]);
 			if (texts[i] != newText) {
-				std::cout << "Regenerating " << paths[i] << "..." << std::endl;
+				std::cout << "Reprocessing " << paths[i] << "..." << std::endl;
 				doScript(newText);
 				texts[i] = newText;
 			}
