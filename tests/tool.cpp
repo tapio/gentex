@@ -45,6 +45,18 @@ struct Command {
 };
 
 std::map<std::string, CommandFunction> s_cmds = {
+	{ "const", [](Image& dst, CompositeFunction op, const Json& params) {
+		Color tint = parseTint(params);
+		dst.composite([tint](int, int) {
+			return tint;
+		}, op);
+	}},
+	{ "noise", [](Image& dst, CompositeFunction op, const Json& params) {
+		Color tint = parseTint(params);
+		dst.composite([tint](int, int) {
+			return Color(rnd()) * tint;
+		}, op);
+	}},
 	{ "sinx", [](Image& dst, CompositeFunction op, const Json& params) {
 		float freq = params["freq"].number_value();
 		float offset = params["offset"].number_value();
@@ -62,12 +74,20 @@ std::map<std::string, CommandFunction> s_cmds = {
 			return Color(std::sin((y + offset) * freq)) * tint;
 		}, op);
 	}},
-	{ "noise", [](Image& dst, CompositeFunction op, const Json& params) {
+	{ "or", [](Image& dst, CompositeFunction op, const Json& params) {
+		float w = dst.w;
 		Color tint = parseTint(params);
-		dst.composite([tint](int, int) {
-			return Color(rnd()) * tint;
+		dst.composite([w, tint](int x, int y) {
+			return ((x | y) / w) * tint;
 		}, op);
-	}}
+	}},
+	{ "xor", [](Image& dst, CompositeFunction op, const Json& params) {
+		float w = dst.w;
+		Color tint = parseTint(params);
+		dst.composite([w, tint](int x, int y) {
+			return ((x ^ y) / w) * tint;
+		}, op);
+	}},
 };
 
 std::string readFile(const std::string& path) {
