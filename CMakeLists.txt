@@ -31,14 +31,13 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
 endif()
 
 # Libs
-include_directories(lib)
-include_directories(include)
+include_directories(third-party)
+include_directories(src)
 
 # Files
 file(GLOB SOURCE_FILES "src/*.cpp")
-file(GLOB HEADER_FILES "include/*.hpp")
-file(GLOB_RECURSE LIB_FILES "lib/*.cpp")
+file(GLOB HEADER_FILES "src/*.hpp")
+file(GLOB_RECURSE LIB_FILES "third-party/*.cpp")
 set(SOURCES ${SOURCE_FILES} ${HEADER_FILES} ${LIB_FILES})
 
-add_executable(basic "tests/basic.cpp" ${SOURCES})
-add_executable(gentex "tests/tool.cpp" ${SOURCES})
+add_executable(gentex ${SOURCES})
