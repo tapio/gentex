@@ -109,32 +109,43 @@ bool doScript(const std::string& text) {
 }
 
 int main(int argc, char** argv) {
-	std::string path;
+	std::vector<std::string> paths;
 	bool watch = false;
 	for (int i = 1; i < argc; ++i) {
 		std::string arg = argv[i];
 		if (arg == "-w" || arg == "--watch") {
 			watch = true;
 		}
-		else path = arg;
+		else paths.push_back(arg);
 	}
-	if (path.empty())
+	if (paths.empty())
 		panic("specify input file");
 
-	std::string text = readFile(path);
-
 	if (!watch) {
-		return doScript(text) ? 0 : 1;
+		int ret = 0;
+		for (const auto& path: paths) {
+			std::cout << "Generating " << path << "..." << std::endl;
+			if (!doScript(readFile(path)))
+				ret++;
+		}
+		return ret;
+	}
+
+	std::vector<std::string> texts;
+	for (const auto& path: paths) {
+		texts.push_back(readFile(path));
 	}
 
 	while (true) {
 		msleep(500);
 		// TODO: This is very crappy way to detect changes
-		std::string newText = readFile(path);
-		if (text != newText) {
-			std::cout << "Regenerating..." << std::endl;
-			doScript(newText);
-			text = newText;
+		for (unsigned i = 0; i < paths.size(); ++i) {
+			std::string newText = readFile(paths[i]);
+			if (texts[i] != newText) {
+				std::cout << "Regenerating " << paths[i] << "..." << std::endl;
+				doScript(newText);
+				texts[i] = newText;
+			}
 		}
 	}
 
