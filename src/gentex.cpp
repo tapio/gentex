@@ -130,6 +130,19 @@ std::map<std::string, CommandFunction> s_cmds = {
 			return Color(c * 0.5f + 0.5f) * tint;
 		}, op);
 	}},
+	{ "turbulence", [](Image& dst, CompositeFunction op, const Json& params) {
+		float s = parseFloat("size", params, 1.f) * min(dst.w, dst.h);
+		Color tint = parseColor("tint", params);
+		dst.composite([=](int x, int y) {
+			float value = 0;
+			float size = s;
+			while (size >= 1.f) {
+				value += perlin(vec2(x / size, y / size)) * size;
+				size *= 0.5f;
+			}
+			return Color(value / s * 0.5f + 0.5f) * tint;
+		}, op);
+	}},
 	{ "pow", [](Image& dst, CompositeFunction op, const Json& params) {
 		float density = 1.f - params["density"].number_value();
 		float sharpness = params["sharpness"].number_value();
