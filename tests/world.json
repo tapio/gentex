@@ -1,0 +1,23 @@
+[
+{
+	"size": [ 256, 256 ],
+	"out": "perlin.tga",
+	"ops": [
+		{ "add": "perlin", "freq": 0.01, "offset": 100, "tint": [ 1.0, 1.0, 1.0 ] },
+		{ "add": "perlin", "freq": 0.02, "offset": 200, "tint": [ 1.0, 1.0, 1.0 ] },
+		{ "add": "perlin", "freq": 0.04, "offset": 300, "tint": [ 1.0, 1.0, 1.0 ] },
+		{ "add": "perlin", "freq": 0.08, "offset": 400, "tint": [ 1.0, 1.0, 1.0 ] },
+		{ "add": "perlin", "freq": 0.16, "offset": 500, "tint": [ 1.0, 1.0, 1.0 ] }
+	]
+},{
+	"size": [ 256, 256 ],
+	"out": "simplex.tga",
+	"ops": [
+		{ "add": "simplex", "freq": 0.01, "offset": 0, "tint": [ 1.0, 1.0, 1.0 ] },
+		{ "add": "simplex", "freq": 0.02, "offset": 0, "tint": [ 1.0, 1.0, 1.0 ] },
+		{ "add": "simplex", "freq": 0.04, "offset": 0, "tint": [ 1.0, 1.0, 1.0 ] },
+		{ "add": "simplex", "freq": 0.08, "offset": 0, "tint": [ 1.0, 1.0, 1.0 ] },
+		{ "add": "simplex", "freq": 0.16, "offset": 0, "tint": [ 1.0, 1.0, 1.0 ] }
+	]
+}
+]

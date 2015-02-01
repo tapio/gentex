@@ -7,6 +7,7 @@
 #define GLM_SWIZZLE
 #define GLM_FORCE_CXX11
 #include <glm/glm.hpp>
+#include <glm/gtc/noise.hpp>
 
 typedef glm::vec3 Color;
 

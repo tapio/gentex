@@ -33,6 +33,16 @@ inline Color parseTint(const Json& params) {
 	} else return Color(1.0f);
 }
 
+inline vec2 parseVec2(const char* name, const Json& params, float def = 0) {
+	const Json& param = params[name];
+	if (param.is_array()) {
+		const auto& arr = param.array_items();
+		return vec2(arr[0].number_value(), arr[1].number_value());
+	} else if (param.is_number())
+		return vec2(param.number_value());
+	return vec2(def);
+}
+
 inline void msleep(int ms) { std::this_thread::sleep_for(std::chrono::milliseconds(ms)); }
 inline float rnd() { return rand() / (float)RAND_MAX; }
 
@@ -55,6 +65,22 @@ std::map<std::string, CommandFunction> s_cmds = {
 		Color tint = parseTint(params);
 		dst.composite([tint](int, int) {
 			return Color(rnd()) * tint;
+		}, op);
+	}},
+	{ "simplex", [](Image& dst, CompositeFunction op, const Json& params) {
+		vec2 freq = parseVec2("freq", params, 1.f);
+		vec2 offset = parseVec2("offset", params, 0.f);
+		Color tint = parseTint(params);
+		dst.composite([freq, offset, tint](int x, int y) {
+			return Color(simplex((vec2(x, y) + offset) * freq)) * tint;
+		}, op);
+	}},
+	{ "perlin", [](Image& dst, CompositeFunction op, const Json& params) {
+		vec2 freq = parseVec2("freq", params, 1.f);
+		vec2 offset = parseVec2("offset", params, 0.f);
+		Color tint = parseTint(params);
+		dst.composite([freq, offset, tint](int x, int y) {
+			return Color(perlin((vec2(x, y) + offset) * freq)) * tint;
 		}, op);
 	}},
 	{ "sinx", [](Image& dst, CompositeFunction op, const Json& params) {
