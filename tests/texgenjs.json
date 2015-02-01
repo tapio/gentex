@@ -71,10 +71,8 @@
 	"size": [ 256, 256 ],
 	"out": "ex07.tga",
 	"ops": [
-		{ "add": "sinx", "freq": 0.066 },
-		{ "add": "siny", "freq": 0.066 },
-		{ "mul": "sinx", "freq": 0.044, "offset": 32, "tint": [ 2, 2, 2 ] },
-		{ "mul": "siny", "freq": 0.044, "offset": 16, "tint": [ 2, 2, 2 ] },
+		{ "add": "sin", "freq": 0.066 },
+		{ "mul": "sin", "freq": 0.044, "offset": [32, 16], "tint": [ 2, 2, 2 ] },
 		{ "sub": "const", "tint": [ 0.5, 2, 4 ] }
 	]
 },{

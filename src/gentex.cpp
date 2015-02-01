@@ -156,11 +156,20 @@ std::map<std::string, CommandFunction> s_cmds = {
 			return interp.get(color);
 		}, op);
 	}},
+	{ "sin", [](Image& dst, CompositeFunction op, const Json& params) {
+		vec2 freq = parseVec2("freq", params, vec2(1.f)) * (float)M_PI;
+		vec2 offset = parseVec2("offset", params, vec2(0.f));
+		Color tint = parseColor("tint", params);
+		dst.composite([=](int x, int y) {
+			vec2 s = sin((vec2(x, y) + offset) * freq);
+			return op(s.x * tint, s.y * tint);
+		}, op);
+	}},
 	{ "sinx", [](Image& dst, CompositeFunction op, const Json& params) {
 		float freq = params["freq"].number_value() * M_PI;
 		float offset = params["offset"].number_value();
 		Color tint = parseColor("tint", params);
-		dst.composite([freq, offset, tint](int x, int) {
+		dst.composite([=](int x, int) {
 			return std::sin((x + offset) * freq) * tint;
 		}, op);
 	}},
@@ -168,7 +177,7 @@ std::map<std::string, CommandFunction> s_cmds = {
 		float freq = params["freq"].number_value() * M_PI;
 		float offset = params["offset"].number_value();
 		Color tint = parseColor("tint", params);
-		dst.composite([freq, offset, tint](int, int y) {
+		dst.composite([=](int, int y) {
 			return std::sin((y + offset) * freq) * tint;
 		}, op);
 	}},
