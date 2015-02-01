@@ -42,6 +42,11 @@ inline vec2 parseVec2(const char* name, const Json& params, vec2 def = vec2(0.f)
 	return def;
 }
 
+inline float parseFloat(const char* name, const Json& params, float def = 0.f) {
+	const Json& param = params[name];
+	return param.is_number() ? param.number_value() : def;
+}
+
 std::map<std::string, CommandFunction> s_cmds = {
 	{ "const", [](Image& dst, CompositeFunction op, const Json& params) {
 		Color tint = parseColor("tint", params);
@@ -70,6 +75,26 @@ std::map<std::string, CommandFunction> s_cmds = {
 		Color tint = parseColor("tint", params);
 		dst.composite([freq, offset, period, tint](int x, int y) {
 			return Color(perlin((vec2(x, y) + offset) * freq, period) * 0.5f + 0.5f) * tint;
+		}, op);
+	}},
+	{ "fbm", [](Image& dst, CompositeFunction op, const Json& params) {
+		vec2 freq = parseVec2("freq", params, vec2(1.f));
+		vec2 offset = parseVec2("offset", params, vec2(0.f));
+		float octaves = parseFloat("octaves", params, 1.f);
+		float persistence = parseFloat("persistence", params, 0.5f);
+		float lacunarity = parseFloat("lacunarity", params, 2.0f);
+		Color tint = parseColor("tint", params);
+		dst.composite([=](int x, int y) {
+			float c = 0.0f;
+			float amplitude = 1.0f;
+			vec2 f = freq;
+			vec2 pos = vec2(x, y) + offset;
+			for (int i = 0; i < octaves; ++i) {
+				c += (perlin(pos * f)) * amplitude;
+				amplitude *= persistence;
+				f *= lacunarity;
+			}
+			return Color(c * 0.5f + 0.5f) * tint;
 		}, op);
 	}},
 	{ "pow", [](Image& dst, CompositeFunction op, const Json& params) {
