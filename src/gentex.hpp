@@ -18,6 +18,10 @@ namespace gentex {
 	using glm::vec3;
 	using glm::vec4;
 	using json11::Json;
+	using glm::min;
+	using glm::max;
+	using glm::exp;
+	using glm::pow;
 
 	typedef std::function<Color(Color, Color)> CompositeFunction;
 	typedef std::function<Color(int, int, Color)> FilterFunction;
@@ -72,15 +76,6 @@ namespace gentex {
 			return get(x % w, y % h);
 		}
 
-		void filter(FilterFunction func) {
-			for (int y = 0; y < h; ++y) {
-				for (int x = 0; x < w; ++x) {
-					Color& color = buffer[y * w + x];
-					color = func(x, y, color);
-				}
-			}
-		}
-
 		void generate(GeneratorFunction func) {
 			for (int y = 0; y < h; ++y) {
 				for (int x = 0; x < w; ++x) {
@@ -94,6 +89,15 @@ namespace gentex {
 				for (int x = 0; x < w; ++x) {
 					Color& color = buffer[y * w + x];
 					color = op(color, func(x, y));
+				}
+			}
+		}
+
+		void filter(FilterFunction func, CompositeFunction op) {
+			for (int y = 0; y < h; ++y) {
+				for (int x = 0; x < w; ++x) {
+					Color& color = buffer[y * w + x];
+					color = op(color, func(x, y, color));
 				}
 			}
 		}
