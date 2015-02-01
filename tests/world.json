@@ -1,13 +1,26 @@
 [
 {
 	"size": [ 256, 256 ],
-	"out": "perlin.tga",
+	"out": "clouds.tga",
 	"ops": [
 		{ "add": "perlin", "freq": 0.01, "offset": 0, "tint": 0.5 },
 		{ "add": "perlin", "freq": 0.02, "offset": 0, "tint": 0.25 },
 		{ "add": "perlin", "freq": 0.04, "offset": 0, "tint": 0.125 },
 		{ "add": "perlin", "freq": 0.08, "offset": 0, "tint": 0.0625 },
-		{ "add": "perlin", "freq": 0.16, "offset": 0, "tint": 0.03125 }
+		{ "add": "perlin", "freq": 0.16, "offset": 0, "tint": 0.03125 },
+		{ "set": "pow", "density": 0.5, "sharpness": 0.05 }
+	]
+},{
+	"size": [ 256, 256 ],
+	"out": "clouds2.tga",
+	"ops": [
+		{ "add": "perlin", "freq": 0.01, "offset": 0, "tint": 0.5 },
+		{ "add": "perlin", "freq": 0.02, "offset": 0, "tint": 0.25 },
+		{ "add": "perlin", "freq": 0.04, "offset": 0, "tint": 0.125 },
+		{ "add": "perlin", "freq": 0.08, "offset": 0, "tint": 0.0625 },
+		{ "add": "perlin", "freq": 0.16, "offset": 0, "tint": 0.03125 },
+		{ "sub": "const", "tint": 0.5 },
+		{ "mul": "const", "tint": 2.0 }
 	]
 },{
 	"size": [ 256, 256 ],

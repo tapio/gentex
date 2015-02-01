@@ -71,6 +71,15 @@ std::map<std::string, CommandFunction> s_cmds = {
 			return Color(perlin((vec2(x, y) + offset) * freq) * 0.5f + 0.5f) * tint;
 		}, op);
 	}},
+	{ "pow", [](Image& dst, CompositeFunction op, const Json& params) {
+		float density = 1.f - params["density"].number_value();
+		float sharpness = params["sharpness"].number_value();
+		Color tint = parseTint(params);
+		dst.filter([density, sharpness, tint](int, int, Color color) {
+			Color c = max(color - density, Color(0.f));
+			return (1.f - glm::pow(Color(sharpness), c)) * tint;
+		}, op);
+	}},
 	{ "sinx", [](Image& dst, CompositeFunction op, const Json& params) {
 		float freq = params["freq"].number_value() * M_PI;
 		float offset = params["offset"].number_value();
@@ -78,7 +87,6 @@ std::map<std::string, CommandFunction> s_cmds = {
 		dst.composite([freq, offset, tint](int x, int) {
 			return std::sin((x + offset) * freq) * tint;
 		}, op);
-
 	}},
 	{ "siny", [](Image& dst, CompositeFunction op, const Json& params) {
 		float freq = params["freq"].number_value() * M_PI;
