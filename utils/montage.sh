@@ -1,3 +1,3 @@
 #!/bin/sh
-montage -geometry +0+0 $@ montage.png
+montage -geometry +0+0 $@ montage.jpg
 

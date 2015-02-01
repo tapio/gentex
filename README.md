@@ -4,12 +4,19 @@ Texture Generator
 This is an incomplete command line tool that generates textures based on a JSON spec.
 Parts of the project are inspired by mrdoob's [texgen.js](https://github.com/mrdoob/texgen.js).
 
+![Output samples](sample.jpg "Output samples")
+
 ## Generator Functions:
 
 * constant color
-* random noise
-* sin x / sin y
+* random non-coherent noise
+* perlin noise
+* simplex noise
+* fractal Brownian motion (fBm)
+* gradient
+* sin
 * or / xor
+* pow (clouds)
 
 ## Tool Features
 
@@ -35,6 +42,8 @@ Parts of the project are inspired by mrdoob's [texgen.js](https://github.com/mrd
 	EOF
 	
 	$ gentex test.json
+
+See more examples in the tests-directory.
 
 ## Building
 
