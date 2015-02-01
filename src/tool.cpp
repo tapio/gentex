@@ -86,20 +86,16 @@ int main(int argc, char** argv) {
 	if (paths.empty())
 		panic("specify input file");
 
-	if (!watch) {
-		int ret = 0;
-		for (const auto& path: paths) {
-			std::cout << "Processing " << path << "..." << std::endl;
-			if (!doScript(readFile(path)))
-				ret++;
-		}
-		return ret;
-	}
-
+	int failCount = 0;
 	std::vector<std::string> texts;
 	for (const auto& path: paths) {
+		std::cout << "Processing " << path << "..." << std::endl;
 		texts.push_back(readFile(path));
+		if (!doScript(texts.back()))
+			failCount++;
 	}
+	if (!watch)
+		return failCount;
 
 	while (true) {
 		msleep(500);
