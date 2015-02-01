@@ -66,9 +66,10 @@ std::map<std::string, CommandFunction> s_cmds = {
 	{ "perlin", [](Image& dst, CompositeFunction op, const Json& params) {
 		vec2 freq = parseVec2("freq", params, 1.f);
 		vec2 offset = parseVec2("offset", params, 0.f);
+		vec2 period = vec2(dst.w, dst.h) * freq;
 		Color tint = parseColor("tint", params);
-		dst.composite([freq, offset, tint](int x, int y) {
-			return Color(perlin((vec2(x, y) + offset) * freq) * 0.5f + 0.5f) * tint;
+		dst.composite([freq, offset, period, tint](int x, int y) {
+			return Color(perlin((vec2(x, y) + offset) * freq, period) * 0.5f + 0.5f) * tint;
 		}, op);
 	}},
 	{ "pow", [](Image& dst, CompositeFunction op, const Json& params) {

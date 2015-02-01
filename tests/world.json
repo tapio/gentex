@@ -3,13 +3,13 @@
 	"size": [ 256, 256 ],
 	"out": "clouds.tga",
 	"ops": [
-		{ "add": "perlin", "freq": 0.01, "offset": 0, "tint": 0.5 },
-		{ "add": "perlin", "freq": 0.02, "offset": 0, "tint": 0.25 },
-		{ "add": "perlin", "freq": 0.04, "offset": 0, "tint": 0.125 },
-		{ "add": "perlin", "freq": 0.08, "offset": 0, "tint": 0.0625 },
-		{ "add": "perlin", "freq": 0.16, "offset": 0, "tint": 0.03125 },
+		{ "add": "perlin", "freq": 0.0078125, "offset": 60, "tint": 0.5 },
+		{ "add": "perlin", "freq": 0.015625, "offset": 0, "tint": 0.25 },
+		{ "add": "perlin", "freq": 0.03125, "offset": 0, "tint": 0.125 },
+		{ "add": "perlin", "freq": 0.0625, "offset": 0, "tint": 0.0625 },
+		{ "add": "perlin", "freq": 0.125, "offset": 0, "tint": 0.03125 },
 		{ "set": "pow", "density": 0.5, "sharpness": 0.05 },
-		{ "set": "inv", "tint": "#990" },
+		{ "set": "inv", "tint": "#aa0" },
 		{ "set": "inv", "tint": "#fff" }
 	]
 },{
@@ -24,7 +24,7 @@
 		{ "sub": "const", "tint": 0.5 },
 		{ "mul": "const", "tint": 2.0 },
 		{ "set": "clamp" },
-		{ "set": "lerp", "a": "#66f", "b": "#fff" }
+		{ "set": "lerp", "a": "#44f", "b": "#fff" }
 	]
 },{
 	"size": [ 256, 256 ],
