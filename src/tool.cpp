@@ -44,7 +44,7 @@ bool doTexture(const Json& spec) {
 		for (const auto& op : s_ops) {
 			if (!cmd[op.name].is_null()) {
 				const std::string& gen = cmd[op.name].string_value();
-				std::cout << "Applying " << gen << " with " << op.name << std::endl;
+				//std::cout << "Applying " << gen << " with " << op.name << std::endl;
 				getCommand(gen)(tex, op.op, cmd);
 				break;
 			}
