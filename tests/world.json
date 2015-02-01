@@ -24,14 +24,14 @@
 	]
 },{
 	"size": [ 256, 256 ],
-	"out": "simplex.tga",
+	"out": "terrain.tga",
 	"ops": [
 		{ "add": "simplex", "freq": 0.01, "offset": 100, "tint": 0.5 },
 		{ "add": "simplex", "freq": 0.02, "offset": 200, "tint": 0.25 },
 		{ "add": "simplex", "freq": 0.04, "offset": 300, "tint": 0.125 },
 		{ "add": "simplex", "freq": 0.08, "offset": 400, "tint": 0.0625 },
 		{ "add": "simplex", "freq": 0.16, "offset": 500, "tint": 0.03125 },
-		{ "set": "gradient", "colors": [ "#44f", "#aa4", "#393", "#666", "#fff" ] }
+		{ "set": "gradient", "colors": [ "#00c", "#00c", "#22c", "#aa4", "#393", "#666", "#fff" ] }
 	]
 }
 ]
