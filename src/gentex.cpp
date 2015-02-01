@@ -32,14 +32,14 @@ inline Color parseColor(const char* name, const Json& params, Color def = Color(
 	return def;
 }
 
-inline vec2 parseVec2(const char* name, const Json& params, float def = 0) {
+inline vec2 parseVec2(const char* name, const Json& params, vec2 def = vec2(0.f)) {
 	const Json& param = params[name];
 	if (param.is_array()) {
 		const auto& arr = param.array_items();
 		return vec2(arr[0].number_value(), arr[1].number_value());
 	} else if (param.is_number())
 		return vec2(param.number_value());
-	return vec2(def);
+	return def;
 }
 
 std::map<std::string, CommandFunction> s_cmds = {
@@ -56,16 +56,16 @@ std::map<std::string, CommandFunction> s_cmds = {
 		}, op);
 	}},
 	{ "simplex", [](Image& dst, CompositeFunction op, const Json& params) {
-		vec2 freq = parseVec2("freq", params, 1.f);
-		vec2 offset = parseVec2("offset", params, 0.f);
+		vec2 freq = parseVec2("freq", params, vec2(1.f));
+		vec2 offset = parseVec2("offset", params, vec2(0.f));
 		Color tint = parseColor("tint", params);
 		dst.composite([freq, offset, tint](int x, int y) {
 			return Color(simplex((vec2(x, y) + offset) * freq) * 0.5f + 0.5f) * tint;
 		}, op);
 	}},
 	{ "perlin", [](Image& dst, CompositeFunction op, const Json& params) {
-		vec2 freq = parseVec2("freq", params, 1.f);
-		vec2 offset = parseVec2("offset", params, 0.f);
+		vec2 freq = parseVec2("freq", params, vec2(1.f));
+		vec2 offset = parseVec2("offset", params, vec2(0.f));
 		vec2 period = vec2(dst.w, dst.h) * freq;
 		Color tint = parseColor("tint", params);
 		dst.composite([freq, offset, period, tint](int x, int y) {
@@ -139,7 +139,7 @@ std::map<std::string, CommandFunction> s_cmds = {
 		}, op);
 	}},
 	{ "circle", [](Image& dst, CompositeFunction op, const Json& params) {
-		vec2 pos = parseVec2("pos", params, dst.w * 0.5f);
+		vec2 pos = parseVec2("pos", params, vec2(dst.w * 0.5f, dst.h * 0.5f));
 		float r = params["radius"].number_value();
 		Color tint = parseColor("tint", params);
 		dst.composite([pos, r, tint](int x, int y) {
