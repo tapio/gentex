@@ -12,8 +12,23 @@ inline Color parseTint(const Json& params) {
 	if (param.is_array()) {
 		const auto& arr = param.array_items();
 		return Color(arr[0].number_value(), arr[1].number_value(), arr[2].number_value());
-	} else if (param.is_number())
+	} else if (param.is_number()) {
 		return Color(param.number_value());
+	} else if (param.is_string()) {
+		const std::string& hex = param.string_value();
+		if (hex.length() == 7 && hex[0] == '#') {
+			float r = std::stoi(hex.substr(1, 2), 0, 16) / 255.f;
+			float g = std::stoi(hex.substr(3, 2), 0, 16) / 255.f;
+			float b = std::stoi(hex.substr(5, 2), 0, 16) / 255.f;
+			return Color(r, g, b);
+		} else if (hex.length() == 4 && hex[0] == '#') {
+			float r = std::stoi(hex.substr(1, 1) + hex.substr(1, 1), 0, 16) / 255.f;
+			float g = std::stoi(hex.substr(2, 1) + hex.substr(2, 1), 0, 16) / 255.f;
+			float b = std::stoi(hex.substr(3, 1) + hex.substr(3, 1), 0, 16) / 255.f;
+			return Color(r, g, b);
+		}
+		std::cerr << "malformed hex color string \"" << hex << "\"" << std::endl;
+	}
 	return Color(1.0f);
 }
 

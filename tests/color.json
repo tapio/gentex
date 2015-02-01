@@ -1,0 +1,13 @@
+{
+	"comment": "Tests different kinds of ways to input tint color",
+	"size": [ 256, 256 ],
+	"out": "color-test.tga",
+	"ops": [
+		{ "add": "rect", "pos": [0, 0], "size": [32, 256], "tint": [1.0, 0.5, 1.0] },
+		{ "add": "rect", "pos": [32, 0], "size": [32, 256], "tint": 0.5 },
+		{ "add": "rect", "pos": [64, 0], "size": [32, 256], "tint": "#88ff88" },
+		{ "add": "rect", "pos": [96, 0], "size": [32, 256], "tint": "#FFFF88" },
+		{ "add": "rect", "pos": [128, 0], "size": [32, 256], "tint": "#7d7" },
+		{ "add": "rect", "pos": [160, 0], "size": [32, 256], "tint": "#DD7" }
+	]
+}
