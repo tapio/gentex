@@ -1,6 +1,7 @@
 #include "gentex.hpp"
 
 #include <fstream>
+#include <iostream>
 
 namespace gentex {
 
@@ -44,7 +45,7 @@ std::map<std::string, CommandFunction> s_cmds = {
 		vec2 offset = parseVec2("offset", params, 0.f);
 		Color tint = parseTint(params);
 		dst.composite([freq, offset, tint](int x, int y) {
-			return Color(simplex((vec2(x, y) + offset) * freq)) * tint;
+			return Color(simplex((vec2(x, y) + offset) * freq) * 0.5f + 0.5f) * tint;
 		}, op);
 	}},
 	{ "perlin", [](Image& dst, CompositeFunction op, const Json& params) {
@@ -52,7 +53,7 @@ std::map<std::string, CommandFunction> s_cmds = {
 		vec2 offset = parseVec2("offset", params, 0.f);
 		Color tint = parseTint(params);
 		dst.composite([freq, offset, tint](int x, int y) {
-			return Color(perlin((vec2(x, y) + offset) * freq)) * tint;
+			return Color(perlin((vec2(x, y) + offset) * freq) * 0.5f + 0.5f) * tint;
 		}, op);
 	}},
 	{ "sinx", [](Image& dst, CompositeFunction op, const Json& params) {
