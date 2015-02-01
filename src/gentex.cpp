@@ -87,6 +87,24 @@ std::map<std::string, CommandFunction> s_cmds = {
 			return ((x ^ y) / w) * tint;
 		}, op);
 	}},
+	{ "rect", [](Image& dst, CompositeFunction op, const Json& params) {
+		vec2 pos = parseVec2("pos", params);
+		vec2 size = parseVec2("size", params);
+		Color tint = parseTint(params);
+		dst.composite([pos, size, tint](int x, int y) {
+			float c = x >= pos.x && x < pos.x + size.x && y >= pos.y && y < pos.y + size.y ? 1.f : 0.f;
+			return Color(c) * tint;
+		}, op);
+	}},
+	{ "circle", [](Image& dst, CompositeFunction op, const Json& params) {
+		vec2 pos = parseVec2("pos", params);
+		float r = params["radius"].number_value();
+		Color tint = parseTint(params);
+		dst.composite([pos, r, tint](int x, int y) {
+			float c = glm::distance(pos, vec2(x, y)) <= r ? 1.f : 0.f;
+			return Color(c) * tint;
+		}, op);
+	}},
 };
 
 CommandFunction& getCommand(const std::string& name) {
