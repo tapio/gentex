@@ -7,8 +7,7 @@ namespace gentex {
 
 inline float rnd() { return rand() / (float)RAND_MAX; }
 
-inline Color parseColor(const char* name, const Json& params, Color def = Color(1.f)) {
-	const Json& param = params[name];
+inline Color parseColor(const Json& param, Color def = Color(1.f)) {
 	if (param.is_array()) {
 		const auto& arr = param.array_items();
 		return Color(arr[0].number_value(), arr[1].number_value(), arr[2].number_value());
@@ -32,6 +31,10 @@ inline Color parseColor(const char* name, const Json& params, Color def = Color(
 	return def;
 }
 
+inline Color parseColor(const char* name, const Json& params, Color def = Color(1.f)) {
+	return parseColor(params[name], def);
+}
+
 inline vec2 parseVec2(const char* name, const Json& params, vec2 def = vec2(0.f)) {
 	const Json& param = params[name];
 	if (param.is_array()) {
@@ -46,6 +49,36 @@ inline float parseFloat(const char* name, const Json& params, float def = 0.f) {
 	const Json& param = params[name];
 	return param.is_number() ? param.number_value() : def;
 }
+
+struct ColorInterpolator {
+	struct GradientPoint { float pos; Color color; };
+
+	ColorInterpolator(const Json& params) {
+		if (params["colors"].is_array()) {
+			const auto& colors = params["colors"].array_items();
+			for (uint i = 0; i < colors.size(); ++i) {
+				points.push_back({
+					i / (colors.size() - 1.f),
+					parseColor(colors[i])
+				});
+			}
+		} else std::cerr << "malformed gradient color array" << std::endl;
+	}
+
+	Color get(Color pos) {
+		// TODO: Repeat?
+		// TODO: Handle all components separately
+		uint i = 0;
+		while (i < points.size()-1 && points[i+1].pos < pos.r) ++i;
+		GradientPoint& p1 = points[i];
+		GradientPoint& p2 = points[i+1];
+		float alpha = (pos.r - p1.pos) / (p2.pos - p1.pos);
+		return mix(p1.color, p2.color, alpha);
+	}
+
+	std::vector<GradientPoint> points;
+};
+
 
 std::map<std::string, CommandFunction> s_cmds = {
 	{ "const", [](Image& dst, CompositeFunction op, const Json& params) {
@@ -117,11 +150,10 @@ std::map<std::string, CommandFunction> s_cmds = {
 			return saturate(color);
 		}, op);
 	}},
-	{ "lerp", [](Image& dst, CompositeFunction op, const Json& params) {
-		Color a = parseColor("a", params, Color(0.f));
-		Color b = parseColor("b", params, Color(1.f));
-		dst.filter([a, b](int, int, Color color) {
-			return mix(a, b, color);
+	{ "gradient", [](Image& dst, CompositeFunction op, const Json& params) {
+		ColorInterpolator interp(params);
+		dst.filter([&](int, int, Color color) {
+			return interp.get(color);
 		}, op);
 	}},
 	{ "sinx", [](Image& dst, CompositeFunction op, const Json& params) {

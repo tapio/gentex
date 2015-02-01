@@ -13,6 +13,7 @@ namespace gentex {
 
 	class Image;
 
+	typedef unsigned int uint;
 	typedef glm::vec3 Color;
 	using glm::vec2;
 	using glm::vec3;
