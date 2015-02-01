@@ -7,10 +7,13 @@ namespace gentex {
 inline float rnd() { return rand() / (float)RAND_MAX; }
 
 inline Color parseTint(const Json& params) {
-	if (params["tint"].is_array()) {
-		const auto& arr = params["tint"].array_items();
+	const Json& param = params["tint"];
+	if (param.is_array()) {
+		const auto& arr = param.array_items();
 		return Color(arr[0].number_value(), arr[1].number_value(), arr[2].number_value());
-	} else return Color(1.0f);
+	} else if (param.is_number())
+		return Color(param.number_value());
+	return Color(1.0f);
 }
 
 inline vec2 parseVec2(const char* name, const Json& params, float def = 0) {
