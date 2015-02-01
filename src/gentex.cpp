@@ -97,7 +97,7 @@ std::map<std::string, CommandFunction> s_cmds = {
 		}, op);
 	}},
 	{ "circle", [](Image& dst, CompositeFunction op, const Json& params) {
-		vec2 pos = parseVec2("pos", params);
+		vec2 pos = parseVec2("pos", params, dst.w * 0.5f);
 		float r = params["radius"].number_value();
 		Color tint = parseTint(params);
 		dst.composite([pos, r, tint](int x, int y) {
