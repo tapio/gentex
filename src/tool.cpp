@@ -6,15 +6,9 @@
 #include <thread>
 
 #include "gentex.hpp"
-#include "json11/json11.hpp"
 
 using namespace gentex;
 using namespace json11;
-
-struct Op {
-	std::string name;
-	CompositeFunction op;
-};
 
 const std::vector<Op> s_ops = {
 	{ "set", [](Color  , Color b) { return b; } },
@@ -26,100 +20,12 @@ const std::vector<Op> s_ops = {
 	{ "max", [](Color a, Color b) { return max(a, b); } },
 };
 
-inline Color parseTint(const Json& params) {
-	if (params["tint"].is_array()) {
-		const auto& arr = params["tint"].array_items();
-		return Color(arr[0].number_value(), arr[1].number_value(), arr[2].number_value());
-	} else return Color(1.0f);
-}
-
-inline vec2 parseVec2(const char* name, const Json& params, float def = 0) {
-	const Json& param = params[name];
-	if (param.is_array()) {
-		const auto& arr = param.array_items();
-		return vec2(arr[0].number_value(), arr[1].number_value());
-	} else if (param.is_number())
-		return vec2(param.number_value());
-	return vec2(def);
-}
-
-inline void msleep(int ms) { std::this_thread::sleep_for(std::chrono::milliseconds(ms)); }
-inline float rnd() { return rand() / (float)RAND_MAX; }
-
-
-typedef std::function<void(Image&, CompositeFunction, const Json&)> CommandFunction;
-
-struct Command {
-	std::string name;
-	CommandFunction cmd;
-};
-
-std::map<std::string, CommandFunction> s_cmds = {
-	{ "const", [](Image& dst, CompositeFunction op, const Json& params) {
-		Color tint = parseTint(params);
-		dst.composite([tint](int, int) {
-			return tint;
-		}, op);
-	}},
-	{ "noise", [](Image& dst, CompositeFunction op, const Json& params) {
-		Color tint = parseTint(params);
-		dst.composite([tint](int, int) {
-			return Color(rnd()) * tint;
-		}, op);
-	}},
-	{ "simplex", [](Image& dst, CompositeFunction op, const Json& params) {
-		vec2 freq = parseVec2("freq", params, 1.f);
-		vec2 offset = parseVec2("offset", params, 0.f);
-		Color tint = parseTint(params);
-		dst.composite([freq, offset, tint](int x, int y) {
-			return Color(simplex((vec2(x, y) + offset) * freq)) * tint;
-		}, op);
-	}},
-	{ "perlin", [](Image& dst, CompositeFunction op, const Json& params) {
-		vec2 freq = parseVec2("freq", params, 1.f);
-		vec2 offset = parseVec2("offset", params, 0.f);
-		Color tint = parseTint(params);
-		dst.composite([freq, offset, tint](int x, int y) {
-			return Color(perlin((vec2(x, y) + offset) * freq)) * tint;
-		}, op);
-	}},
-	{ "sinx", [](Image& dst, CompositeFunction op, const Json& params) {
-		float freq = params["freq"].number_value() * M_PI;
-		float offset = params["offset"].number_value();
-		Color tint = parseTint(params);
-		dst.composite([freq, offset, tint](int x, int) {
-			return std::sin((x + offset) * freq) * tint;
-		}, op);
-
-	}},
-	{ "siny", [](Image& dst, CompositeFunction op, const Json& params) {
-		float freq = params["freq"].number_value() * M_PI;
-		float offset = params["offset"].number_value();
-		Color tint = parseTint(params);
-		dst.composite([freq, offset, tint](int, int y) {
-			return std::sin((y + offset) * freq) * tint;
-		}, op);
-	}},
-	{ "or", [](Image& dst, CompositeFunction op, const Json& params) {
-		float w = dst.w;
-		Color tint = parseTint(params);
-		dst.composite([w, tint](int x, int y) {
-			return ((x | y) / w) * tint;
-		}, op);
-	}},
-	{ "xor", [](Image& dst, CompositeFunction op, const Json& params) {
-		float w = dst.w;
-		Color tint = parseTint(params);
-		dst.composite([w, tint](int x, int y) {
-			return ((x ^ y) / w) * tint;
-		}, op);
-	}},
-};
-
 std::string readFile(const std::string& path) {
 	std::ifstream f(path);
 	return std::string(std::istreambuf_iterator<char>(f), std::istreambuf_iterator<char>());
 }
+
+inline void msleep(int ms) { std::this_thread::sleep_for(std::chrono::milliseconds(ms)); }
 
 void panic(const char* msg) {
 	std::cout << msg << std::endl;
@@ -139,7 +45,7 @@ bool doTexture(const Json& spec) {
 			if (!cmd[op.name].is_null()) {
 				const std::string& gen = cmd[op.name].string_value();
 				std::cout << "Applying " << gen << " with " << op.name << std::endl;
-				s_cmds[gen](tex, op.op, cmd);
+				getCommand(gen)(tex, op.op, cmd);
 				break;
 			}
 		}
