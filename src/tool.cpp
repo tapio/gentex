@@ -52,10 +52,13 @@ bool doTexture(const Json& spec) {
 		}
 	}
 
-	tex.writeTGA(outfile);
 	auto t1 = std::chrono::steady_clock::now();
 	auto dtms = std::chrono::duration_cast<std::chrono::milliseconds>(t1 - t0).count();
-	std::cout << " " << dtms << " ms" << std::endl;
+	std::cout << " " << dtms << " ms" << std::flush;
+	tex.writeTGA(outfile);
+	auto t2 = std::chrono::steady_clock::now();
+	dtms = std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count();
+	std::cout << "   (write: " << dtms << " ms)" << std::endl;
 	return true;
 }
 
