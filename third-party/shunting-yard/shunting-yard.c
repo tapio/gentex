@@ -4,7 +4,6 @@
 // found in the LICENSE file.
 
 #include "shunting-yard.h"
-#include "stack.h"
 
 #include <ctype.h>
 #include <math.h>
@@ -47,6 +46,25 @@ typedef struct {
     OperatorAssociativity associativity;
 } Operator;
 
+typedef struct {
+    int size;
+    double values[OPERAND_STACK_SIZE];
+} OperandStack;
+
+typedef struct {
+    int size;
+    const Operator* values[OPERATOR_STACK_SIZE];
+} OperatorStack;
+
+typedef struct {
+    int size;
+    const char* values[FUNCTION_STACK_SIZE];
+} FunctionStack;
+
+#define STACK_PUSH(stack, value) (stack)->values[(stack)->size++] = (value)
+#define STACK_POP(stack) (stack)->values[--(stack)->size]
+#define STACK_TOP(stack) (stack)->values[(stack)->size-1]
+
 static const Token NO_TOKEN = {TOKEN_NONE, NULL};
 
 static const Operator OPERATORS[] = {
@@ -64,41 +82,35 @@ static const Operator OPERATORS[] = {
 
 // Returns an array of tokens extracted from the expression. The array is
 // terminated by a token with type `TOKEN_NONE`.
-static Token *tokenize(const char *expression);
+static void tokenize(const char *expression, Token *tokens);
 
 // Parses a tokenized expression.
-static Status parse(const Token *tokens, Stack **operands, Stack **operators,
-                    Stack **functions);
+static Status parse(const Token *tokens, OperandStack *operands, OperatorStack *operators,
+                    FunctionStack *functions);
 
 // Pushes an operator to the stack after applying operators with a higher
 // precedence.
-static Status push_operator(const Operator *operator, Stack **operands,
-                            Stack **operators);
+static Status push_operator(const Operator *operator, OperandStack *operands,
+                            OperatorStack *operators);
 
 // Pushes the multiplication operator to the stack.
-static Status push_multiplication(Stack **operands, Stack **operators);
-
-// Allocates memory for a double and pushes it to the stack.
-static void push_double(double x, Stack **operands);
-
-// Pops a double from the stack, frees its memory and returns its value.
-static double pop_double(Stack **operands);
+static Status push_multiplication(OperandStack *operands, OperatorStack *operators);
 
 // Converts a string into a number and pushes it to the stack.
-static Status push_number(const char *value, Stack **operands);
+static Status push_number(const char *value, OperandStack *operands);
 
 // Converts a constant identifier into its value and pushes it to the stack.
-static Status push_constant(const char *value, Stack **operands);
+static Status push_constant(const char *value, OperandStack *operands);
 
 // Applies an operator to the top one or two operands, depending on if the
 // operator is unary or binary.
-static Status apply_operator(const Operator *operator, Stack **operands);
+static Status apply_operator(const Operator *operator, OperandStack *operands);
 
 // Applies a unary operator to the top operand.
-static Status apply_unary_operator(const Operator *operator, Stack **operands);
+static Status apply_unary_operator(const Operator *operator, OperandStack *operands);
 
 // Applies a function to the top operand.
-static Status apply_function(const char *function, Stack **operands);
+static Status apply_function(const char *function, OperandStack *operands);
 
 // Returns the arity of an operator, using the previous token for context.
 static OperatorArity get_arity(char symbol, const Token *previous);
@@ -107,29 +119,23 @@ static OperatorArity get_arity(char symbol, const Token *previous);
 static const Operator *get_operator(char symbol, OperatorArity arity);
 
 Status shunting_yard(const char *expression, double *result) {
-    Token *tokens = tokenize(expression);
-    Stack *operands = NULL, *operators = NULL, *functions = NULL;
+    Token tokens[MAX_TOKENS];
+    tokenize(expression, tokens);
+    OperandStack operands; operands.size = 0;
+    OperatorStack operators; operators.size = 0;
+    FunctionStack functions; functions.size = 0;
     Status status = parse(tokens, &operands, &operators, &functions);
-    if (operands)
-        *result = round(pop_double(&operands) * 10e14) / 10e14;
+    if (operands.size)
+        *result = round(STACK_POP(&operands) * 10e14) / 10e14;
     else if (status == OK)
         status = ERROR_NO_INPUT;
-
     for (Token *token = tokens; token->type != TOKEN_NONE; token++)
         free(token->value);
-    free(tokens);
-    while (operands)
-        pop_double(&operands);
-    while (operators)
-        stack_pop(&operators);
-    while (functions)
-        stack_pop(&functions);
     return status;
 }
 
-Token *tokenize(const char *expression) {
+void tokenize(const char *expression, Token *tokens) {
     int length = 0;
-    Token *tokens = malloc(sizeof *tokens);
     const char *c = expression;
     while (*c) {
         Token token = {TOKEN_UNKNOWN, NULL};
@@ -146,17 +152,15 @@ Token *tokenize(const char *expression) {
             token.type = TOKEN_IDENTIFIER;
 
         if (!isspace(*c)) {
-            tokens = realloc(tokens, sizeof *tokens * (++length + 1));
-            tokens[length - 1] = token;
+            tokens[length++] = token;
         }
         c += token.value ? strlen(token.value) : 1;
     }
     tokens[length] = NO_TOKEN;
-    return tokens;
 }
 
-Status parse(const Token *tokens, Stack **operands, Stack **operators,
-             Stack **functions) {
+Status parse(const Token *tokens, OperandStack *operands, OperatorStack *operators,
+             FunctionStack *functions) {
     Status status = OK;
     for (const Token *token = tokens, *previous = &NO_TOKEN, *next = token + 1;
          token->type != TOKEN_NONE; previous = token, token = next++) {
@@ -166,14 +170,14 @@ Status parse(const Token *tokens, Stack **operands, Stack **operators,
                 if (previous->type == TOKEN_CLOSE_PARENTHESIS)
                     status = push_multiplication(operands, operators);
 
-                stack_push(operators, get_operator('(', OPERATOR_OTHER));
+                STACK_PUSH(operators, get_operator('(', OPERATOR_OTHER));
                 break;
 
             case TOKEN_CLOSE_PARENTHESIS: {
                 // Apply operators until the previous open parenthesis is found.
                 bool found_parenthesis = false;
-                while (*operators && status == OK && !found_parenthesis) {
-                    const Operator *operator = stack_pop(operators);
+                while (operators->size && status == OK && !found_parenthesis) {
+                    const Operator *operator = STACK_POP(operators);
                     if (operator->symbol == '(')
                         found_parenthesis = true;
                     else
@@ -181,8 +185,8 @@ Status parse(const Token *tokens, Stack **operands, Stack **operators,
                 }
                 if (!found_parenthesis)
                     status = ERROR_CLOSE_PARENTHESIS;
-                else if (*functions)
-                    status = apply_function(stack_pop(functions), operands);
+                else if (functions->size)
+                    status = apply_function(STACK_POP(functions), operands);
                 break;
             }
 
@@ -213,7 +217,7 @@ Status parse(const Token *tokens, Stack **operands, Stack **operators,
                 status = push_constant(token->value, operands);
                 if (status == ERROR_UNDEFINED_CONSTANT &&
                         next->type == TOKEN_OPEN_PARENTHESIS) {
-                    stack_push(functions, token->value);
+                    STACK_PUSH(functions, token->value);
                     status = OK;
                 } else if (next->type == TOKEN_OPEN_PARENTHESIS ||
                            next->type == TOKEN_IDENTIFIER) {
@@ -230,8 +234,8 @@ Status parse(const Token *tokens, Stack **operands, Stack **operators,
     }
 
     // Apply all remaining operators.
-    while (*operators && status == OK) {
-        const Operator *operator = stack_pop(operators);
+    while (operators->size && status == OK) {
+        const Operator *operator = STACK_POP(operators);
         if (operator->symbol == '(')
             status = ERROR_OPEN_PARENTHESIS;
         else
@@ -240,56 +244,43 @@ Status parse(const Token *tokens, Stack **operands, Stack **operators,
     return status;
 }
 
-Status push_operator(const Operator *operator, Stack **operands,
-                     Stack **operators) {
+Status push_operator(const Operator *operator, OperandStack *operands,
+                     OperatorStack *operators) {
     if (!operator)
         return ERROR_SYNTAX;
 
     Status status = OK;
-    while (*operators && status == OK) {
-        const Operator *stack_operator = stack_top(*operators);
+    while (operators->size && status == OK) {
+        const Operator *stack_operator = STACK_TOP(operators);
         if (operator->arity == OPERATOR_UNARY ||
                 operator->precedence < stack_operator->precedence ||
                 (operator->associativity == OPERATOR_RIGHT &&
                  operator->precedence == stack_operator->precedence))
             break;
 
-        status = apply_operator(stack_pop(operators), operands);
+        status = apply_operator(STACK_POP(operators), operands);
     }
-    stack_push(operators, operator);
+    STACK_PUSH(operators, operator);
     return status;
 }
 
-Status push_multiplication(Stack **operands, Stack **operators) {
+Status push_multiplication(OperandStack *operands, OperatorStack *operators) {
     return push_operator(get_operator('*', OPERATOR_BINARY), operands,
                          operators);
 }
 
-void push_double(double x, Stack **operands) {
-    double *pointer = malloc(sizeof *pointer);
-    *pointer = x;
-    stack_push(operands, pointer);
-}
-
-double pop_double(Stack **operands) {
-    const double *pointer = stack_pop(operands);
-    double x = *pointer;
-    free((void *)pointer);
-    return x;
-}
-
-Status push_number(const char *value, Stack **operands) {
+Status push_number(const char *value, OperandStack *operands) {
     char *end_pointer = NULL;
     double x = strtod(value, &end_pointer);
 
     // If not all of the value is converted, the rest is invalid.
     if (value + strlen(value) != end_pointer)
         return ERROR_SYNTAX;
-    push_double(x, operands);
+    STACK_PUSH(operands, x);
     return OK;
 }
 
-Status push_constant(const char *value, Stack **operands) {
+Status push_constant(const char *value, OperandStack *operands) {
     double x = 0.0;
     if (strcasecmp(value, "e") == 0)
         x = M_E;
@@ -299,20 +290,20 @@ Status push_constant(const char *value, Stack **operands) {
         x = M_PI * 2;
     else
         return ERROR_UNDEFINED_CONSTANT;
-    push_double(x, operands);
+    STACK_PUSH(operands, x);
     return OK;
 }
 
-Status apply_operator(const Operator *operator, Stack **operands) {
-    if (!operator || !*operands)
+Status apply_operator(const Operator *operator, OperandStack *operands) {
+    if (!operator || !operands)
         return ERROR_SYNTAX;
     if (operator->arity == OPERATOR_UNARY)
         return apply_unary_operator(operator, operands);
 
-    double y = pop_double(operands);
-    if (!*operands)
+    double y = STACK_POP(operands);
+    if (!operands)
         return ERROR_SYNTAX;
-    double x = pop_double(operands);
+    double x = STACK_POP(operands);
     Status status = OK;
     switch (operator->symbol) {
         case '^':
@@ -336,12 +327,12 @@ Status apply_operator(const Operator *operator, Stack **operands) {
         default:
             return ERROR_UNRECOGNIZED;
     }
-    push_double(x, operands);
+    STACK_PUSH(operands, x);
     return status;
 }
 
-Status apply_unary_operator(const Operator *operator, Stack **operands) {
-    double x = pop_double(operands);
+Status apply_unary_operator(const Operator *operator, OperandStack *operands) {
+    double x = STACK_POP(operands);
     switch (operator->symbol) {
         case '+':
             break;
@@ -354,15 +345,15 @@ Status apply_unary_operator(const Operator *operator, Stack **operands) {
         default:
             return ERROR_UNRECOGNIZED;
     }
-    push_double(x, operands);
+    STACK_PUSH(operands, x);
     return OK;
 }
 
-Status apply_function(const char *function, Stack **operands) {
-    if (!*operands)
+Status apply_function(const char *function, OperandStack *operands) {
+    if (!operands)
         return ERROR_FUNCTION_ARGUMENTS;
 
-    double x = pop_double(operands);
+    double x = STACK_POP(operands);
     if (strcasecmp(function, "abs") == 0)
         x = fabs(x);
     else if (strcasecmp(function, "sqrt") == 0)
@@ -382,7 +373,7 @@ Status apply_function(const char *function, Stack **operands) {
         x = tan(x);
     else
         return ERROR_UNDEFINED_FUNCTION;
-    push_double(x, operands);
+    STACK_PUSH(operands, x);
     return OK;
 }
 

@@ -6,6 +6,22 @@
 #ifndef SHUNTING_YARD_H
 #define SHUNTING_YARD_H
 
+#ifndef MAX_TOKENS
+#define MAX_TOKENS 128
+#endif
+
+#ifndef OPERAND_STACK_SIZE
+#define OPERAND_STACK_SIZE 64
+#endif
+
+#ifndef OPERATOR_STACK_SIZE
+#define OPERATOR_STACK_SIZE 64
+#endif
+
+#ifndef FUNCTION_STACK_SIZE
+#define FUNCTION_STACK_SIZE 64
+#endif
+
 typedef enum {
     OK,
     ERROR_SYNTAX,
