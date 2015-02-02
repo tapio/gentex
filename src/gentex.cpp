@@ -5,6 +5,9 @@
 #include <algorithm>
 
 #include "calculate/calculate.hpp"
+extern "C" {
+#include "shunting-yard/shunting-yard.h"
+}
 
 namespace gentex {
 
@@ -18,6 +21,7 @@ inline Color parseColor(const Json& param, Color def = Color(1.f)) {
 		return Color(param.number_value());
 	} else if (param.is_string()) {
 		const std::string& str = param.string_value();
+		if (str.empty()) return def;
 		if (str.length() == 7 && str[0] == '#') {
 			float r = std::stoi(str.substr(1, 2), 0, 16) / 255.f;
 			float g = std::stoi(str.substr(3, 2), 0, 16) / 255.f;
@@ -28,11 +32,15 @@ inline Color parseColor(const Json& param, Color def = Color(1.f)) {
 			float g = std::stoi(str.substr(2, 1) + str.substr(2, 1), 0, 16) / 255.f;
 			float b = std::stoi(str.substr(3, 1) + str.substr(3, 1), 0, 16) / 255.f;
 			return Color(r, g, b);
-		} else if (!str.empty() && str[0] == '#') {
+		} else if (str[0] == '#') {
 			std::cerr << "malformed hex color string \"" << str << "\"" << std::endl;
-		} else {
-			postfix_t postfix = infix2postfix(str);
+		} else if (str[0] == '=') {
+			postfix_t postfix = infix2postfix(str.substr(1));
 			float res = evalpostfix(postfix);
+			return Color(res);
+		} else if (str[0] == '?') {
+			double res = 0;
+			shunting_yard(str.substr(1).c_str(), &res);
 			return Color(res);
 		}
 	}

@@ -37,7 +37,7 @@ include_directories(src)
 # Files
 file(GLOB SOURCE_FILES "src/*.cpp")
 file(GLOB HEADER_FILES "src/*.hpp")
-file(GLOB_RECURSE LIB_FILES "third-party/*.cpp")
+file(GLOB_RECURSE LIB_FILES "third-party/*.cpp" "third-party/*.c")
 set(SOURCES ${SOURCE_FILES} ${HEADER_FILES} ${LIB_FILES})
 
 add_executable(gentex ${SOURCES})
