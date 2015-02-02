@@ -242,6 +242,24 @@ std::map<std::string, CommandFunction> s_cmds = {
 			return Color(c) * tint;
 		}, op);
 	}},
+	{ "calc", [](Image& dst, CompositeFunction op, const Json& params) {
+		const std::string& str = params["expr"].string_value();
+		Color tint = parseColor("tint", params);
+		dst.composite([=](int, int) {
+			postfix_t postfix = infix2postfix(str);
+			float res = evalpostfix(postfix);
+			return Color(res) * tint;
+		}, op);
+	}},
+	{ "shun", [](Image& dst, CompositeFunction op, const Json& params) {
+		const std::string& str = params["expr"].string_value();
+		Color tint = parseColor("tint", params);
+		dst.composite([=](int, int) {
+			double res = 0;
+			shunting_yard(str.c_str(), &res);
+			return Color(res) * tint;
+		}, op);
+	}},
 };
 
 CommandFunction& getCommand(const std::string& name) {
