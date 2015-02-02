@@ -91,8 +91,12 @@ int main(int argc, char** argv) {
 	for (const auto& path: paths) {
 		std::cout << "Processing " << path << "..." << std::endl;
 		texts.push_back(readFile(path));
+		auto t0 = std::chrono::steady_clock::now();
 		if (!doScript(texts.back()))
 			failCount++;
+		auto t1 = std::chrono::steady_clock::now();
+		auto dtms = std::chrono::duration_cast<std::chrono::milliseconds>(t1 - t0).count();
+		std::cout << "Done in " << dtms << " ms" << std::endl;
 	}
 	if (!watch)
 		return failCount;
@@ -104,7 +108,11 @@ int main(int argc, char** argv) {
 			std::string newText = readFile(paths[i]);
 			if (texts[i] != newText) {
 				std::cout << "Reprocessing " << paths[i] << "..." << std::endl;
+				auto t0 = std::chrono::steady_clock::now();
 				doScript(newText);
+				auto t1 = std::chrono::steady_clock::now();
+				auto dtms = std::chrono::duration_cast<std::chrono::milliseconds>(t1 - t0).count();
+				std::cout << "Done in " << dtms << " ms" << std::endl;
 				texts[i] = newText;
 			}
 		}
