@@ -34,7 +34,8 @@ void panic(const char* msg) {
 
 bool doTexture(const Json& spec) {
 	const std::string& outfile = spec["out"].string_value();
-	std::cout << "Generating " << outfile << "..." << std::endl;
+	std::cout << "Generating " << outfile << "..." << std::flush;
+	auto t0 = std::chrono::steady_clock::now();
 	int w = spec["size"][0].int_value();
 	int h = spec["size"][1].int_value();
 	Image tex(w, h);
@@ -52,6 +53,9 @@ bool doTexture(const Json& spec) {
 	}
 
 	tex.writeTGA(outfile);
+	auto t1 = std::chrono::steady_clock::now();
+	auto dtms = std::chrono::duration_cast<std::chrono::milliseconds>(t1 - t0).count();
+	std::cout << " " << dtms << " ms" << std::endl;
 	return true;
 }
 
@@ -96,7 +100,7 @@ int main(int argc, char** argv) {
 			failCount++;
 		auto t1 = std::chrono::steady_clock::now();
 		auto dtms = std::chrono::duration_cast<std::chrono::milliseconds>(t1 - t0).count();
-		std::cout << "Done in " << dtms << " ms" << std::endl;
+		std::cout << "File done in " << dtms << " ms" << std::endl;
 	}
 	if (!watch)
 		return failCount;
@@ -112,7 +116,7 @@ int main(int argc, char** argv) {
 				doScript(newText);
 				auto t1 = std::chrono::steady_clock::now();
 				auto dtms = std::chrono::duration_cast<std::chrono::milliseconds>(t1 - t0).count();
-				std::cout << "Done in " << dtms << " ms" << std::endl;
+				std::cout << "File done in " << dtms << " ms" << std::endl;
 				texts[i] = newText;
 			}
 		}
