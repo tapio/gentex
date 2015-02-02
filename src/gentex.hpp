@@ -40,6 +40,8 @@ namespace gentex {
 		CompositeFunction op;
 	};
 
+	void initMathParser();
+
 	inline Color saturate(const Color c) { return clamp(c, 0.0f, 1.0f); }
 
 	CommandFunction& getCommand(const std::string& name);

@@ -2,6 +2,9 @@
 
 #include <fstream>
 #include <iostream>
+#include <algorithm>
+
+#include "calculate/calculate.hpp"
 
 namespace gentex {
 
@@ -14,19 +17,24 @@ inline Color parseColor(const Json& param, Color def = Color(1.f)) {
 	} else if (param.is_number()) {
 		return Color(param.number_value());
 	} else if (param.is_string()) {
-		const std::string& hex = param.string_value();
-		if (hex.length() == 7 && hex[0] == '#') {
-			float r = std::stoi(hex.substr(1, 2), 0, 16) / 255.f;
-			float g = std::stoi(hex.substr(3, 2), 0, 16) / 255.f;
-			float b = std::stoi(hex.substr(5, 2), 0, 16) / 255.f;
+		const std::string& str = param.string_value();
+		if (str.length() == 7 && str[0] == '#') {
+			float r = std::stoi(str.substr(1, 2), 0, 16) / 255.f;
+			float g = std::stoi(str.substr(3, 2), 0, 16) / 255.f;
+			float b = std::stoi(str.substr(5, 2), 0, 16) / 255.f;
 			return Color(r, g, b);
-		} else if (hex.length() == 4 && hex[0] == '#') {
-			float r = std::stoi(hex.substr(1, 1) + hex.substr(1, 1), 0, 16) / 255.f;
-			float g = std::stoi(hex.substr(2, 1) + hex.substr(2, 1), 0, 16) / 255.f;
-			float b = std::stoi(hex.substr(3, 1) + hex.substr(3, 1), 0, 16) / 255.f;
+		} else if (str.length() == 4 && str[0] == '#') {
+			float r = std::stoi(str.substr(1, 1) + str.substr(1, 1), 0, 16) / 255.f;
+			float g = std::stoi(str.substr(2, 1) + str.substr(2, 1), 0, 16) / 255.f;
+			float b = std::stoi(str.substr(3, 1) + str.substr(3, 1), 0, 16) / 255.f;
 			return Color(r, g, b);
+		} else if (!str.empty() && str[0] == '#') {
+			std::cerr << "malformed hex color string \"" << str << "\"" << std::endl;
+		} else {
+			postfix_t postfix = infix2postfix(str);
+			float res = evalpostfix(postfix);
+			return Color(res);
 		}
-		std::cerr << "malformed hex color string \"" << hex << "\"" << std::endl;
 	}
 	return def;
 }
@@ -262,6 +270,56 @@ void Image::writeTGA(const std::string& filepath) const {
 			tgaout << static_cast<unsigned char>(pix.r * 255);
 		}
 	}
+}
+
+
+void initMathParser() {
+	opers.insert({"+", oper_t{false, 1, false}});
+	opers.insert({"-", oper_t{false, 1, false}});
+	opers.insert({"*", oper_t{false, 2, false}});
+	opers.insert({"/", oper_t{false, 2, false}});
+	opers.insert({"%", oper_t{false, 2, false}});
+	opers.insert({"^", oper_t{true, 3, false}});
+	opers.insert({"+", oper_t{false, 10, true}});
+	opers.insert({"-", oper_t{false, 10, true}});
+	opers.insert({"!", oper_t{true, 11, true}});
+
+	funcs.insert({"+", func_args(1, [](args_t v) { return v[0]; })});
+	funcs.insert({"+", func_args(2, [](args_t v) { return v[0] + v[1]; })});
+	funcs.insert({"-", func_args(1, [](args_t v) { return -v[0]; })});
+	funcs.insert({"-", func_args(2, [](args_t v) { return v[0] - v[1]; })});
+	funcs.insert({"*", func_args(2, [](args_t v) { return v[0] * v[1]; })});
+	funcs.insert({"/", func_args(2, [](args_t v) { return v[0] / v[1]; })});
+	funcs.insert({"%", func_args(2, [](args_t v) { return fmod(v[0], v[1]); })});
+	funcs.insert({"^", func_args(2, [](args_t v) { return pow(v[0], v[1]); })});
+	funcs.insert({"abs", func_args(1, [](args_t v) { return std::abs(v[0]); })});
+	funcs.insert({"log", func_args(1, [](args_t v) { return log10(v[0]); })});
+	funcs.insert({"log", func_args(2, [](args_t v) { return log(v[1]) / log(v[0]); })});
+	funcs.insert({"ln", func_args(1, [](args_t v) { return log(v[0]); })});
+	funcs.insert({"sqrt", func_args(1, [](args_t v) { return sqrt(v[0]); })});
+	funcs.insert({"root", func_args(2, [](args_t v) { return pow(v[1], 1.0 / v[0]); })});
+	funcs.insert({"sin", func_args(1, [](args_t v) { return sin(v[0]); })});
+	funcs.insert({"cos", func_args(1, [](args_t v) { return cos(v[0]); })});
+	funcs.insert({"tan", func_args(1, [](args_t v) { return tan(v[0]); })});
+	funcs.insert({"asin", func_args(1, [](args_t v) { return asin(v[0]); })});
+	funcs.insert({"acos", func_args(1, [](args_t v) { return acos(v[0]); })});
+	funcs.insert({"atan", func_args(1, [](args_t v) { return atan(v[0]); })});
+	funcs.insert({"atan2", func_args(2, [](args_t v) { return atan2(v[0], v[1]); })});
+	funcs.insert({"ceil", func_args(1, [](args_t v) { return ceil(v[0]); })});
+	funcs.insert({"floor", func_args(1, [](args_t v) { return floor(v[0]); })});
+	funcs.insert({"min", [](args_t v) {
+		if (v.size() > 0) return return_t(true, *min_element(v.begin(), v.end()));
+		else return return_t(false, 0.0);
+	}});
+	funcs.insert({"max", [](args_t v)
+	{
+		if (v.size() > 0) return return_t(true, *max_element(v.begin(), v.end()));
+		else return return_t(false, 0.0);
+	}});
+	funcs.insert({"!", func_args(1, [](args_t v) { return tgamma(v[0] + 1); })});
+	funcs.insert({"pi", func_constant(acos(-1.L))});
+	funcs.insert({"e", func_constant(exp(1.L))});
+	funcs.insert({"_", func_constant(NAN)});
 }
 
 } // namespace
