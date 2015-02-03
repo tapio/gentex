@@ -85,12 +85,8 @@ static const Operator OPERATORS[] = {
 	{'(', 6, OPERATOR_OTHER,  OPERATOR_NONE}
 };
 
-// Returns an array of tokens extracted from the expression. The array is
-// terminated by a token with type `TOKEN_NONE`.
-static void tokenize(const char *expression, Token *tokens);
-
 // Parses a tokenized expression.
-static Status parse(const Token *tokens, OperandStack *operands, OperatorStack *operators, FunctionStack *functions);
+static Status eval(const Token *tokens, OperandStack *operands, OperatorStack *operators, FunctionStack *functions);
 
 // Pushes an operator to the stack after applying operators with a higher
 // precedence.
@@ -120,21 +116,12 @@ static const Operator *get_operator(char symbol, OperatorArity arity);
 
 Status shunting_yard(const char *expression, double *result) {
 	Token tokens[MAX_TOKENS];
-	tokenize(expression, tokens);
-	OperandStack operands; operands.size = 0;
-	OperatorStack operators; operators.size = 0;
-	FunctionStack functions; functions.size = 0;
-	Status status = parse(tokens, &operands, &operators, &functions);
-	if (operands.size)
-		*result = round(STACK_POP(&operands) * 10e14) / 10e14;
-	else if (status == OK)
-		status = ERROR_NO_INPUT;
-	for (Token *token = tokens; token->type != TOKEN_NONE; token++)
-		free(token->value);
-	return status;
+	shunting_yard_parse(expression, tokens);
+	return shunting_yard_eval(tokens, result);
 }
 
-void tokenize(const char *expression, Token *tokens) {
+void shunting_yard_parse(const char *expression, void *mem) {
+	Token* tokens = (Token*)mem;
 	int length = 0;
 	const char *c = expression;
 	while (*c) {
@@ -162,7 +149,22 @@ void tokenize(const char *expression, Token *tokens) {
 	tokens[length] = NO_TOKEN;
 }
 
-Status parse(const Token *tokens, OperandStack *operands, OperatorStack *operators, FunctionStack *functions) {
+Status shunting_yard_eval(void *mem, double *result) {
+	Token* tokens = (Token*)mem;
+	OperandStack operands; operands.size = 0;
+	OperatorStack operators; operators.size = 0;
+	FunctionStack functions; functions.size = 0;
+	Status status = eval(tokens, &operands, &operators, &functions);
+	if (operands.size)
+		*result = round(STACK_POP(&operands) * 10e14) / 10e14;
+	else if (status == OK)
+		status = ERROR_NO_INPUT;
+	//for (Token *token = tokens; token->type != TOKEN_NONE; token++)
+	//	free(token->value);
+	return status;
+}
+
+Status eval(const Token *tokens, OperandStack *operands, OperatorStack *operators, FunctionStack *functions) {
 	Status status = OK;
 	for (const Token *token = tokens, *previous = &NO_TOKEN, *next = token + 1;
 		 token->type != TOKEN_NONE; previous = token, token = next++) {

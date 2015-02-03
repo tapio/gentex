@@ -38,4 +38,7 @@ typedef enum {
 // Calculates the result of a mathematical expression.
 Status shunting_yard(const char *expression, double *result);
 
+void shunting_yard_parse(const char *expression, void *tokens);
+Status shunting_yard_eval(void* tokens, double *result);
+
 } // namespace

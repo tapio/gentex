@@ -255,9 +255,11 @@ std::map<std::string, CommandFunction> s_cmds = {
 	{ "shun", [](Image& dst, CompositeFunction op, const Json& params) {
 		const std::string& str = params["expr"].string_value();
 		Color tint = parseColor("tint", params);
+		char tokens[4096];
+		calc::shunting_yard_parse(str.c_str(), tokens);
 		dst.composite([=](int, int) {
 			double res = 0;
-			calc::shunting_yard(str.c_str(), &res);
+			calc::shunting_yard_eval((void*)tokens, &res);
 			return Color(res) * tint;
 		}, op);
 	}},
