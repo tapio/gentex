@@ -39,6 +39,7 @@ typedef enum {
 Status shunting_yard(const char *expression, double *result);
 
 void shunting_yard_parse(const char *expression, void *tokens);
+void shunting_yard_set_var(char var, double value, void *tokens);
 Status shunting_yard_eval(void* tokens, double *result);
 
 } // namespace

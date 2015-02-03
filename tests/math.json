@@ -23,7 +23,7 @@
 	"out": "mathtest_shun.tga",
 	"ops": [
 		{ "add": "const", "tint": "?abs(cos(pi)) * 0.5 + 0.5 - 0.75" },
-		{ "add": "shun", "expr": "abs(cos(pi)) * 0.5 + 0.5 - 0.75" }
+		{ "add": "shun", "expr": "abs(cos(pi + x/10)) * 0.5 + 0.5 - 0.75" }
 	]
 }
 ]

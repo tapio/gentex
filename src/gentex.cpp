@@ -257,8 +257,10 @@ std::map<std::string, CommandFunction> s_cmds = {
 		Color tint = parseColor("tint", params);
 		char tokens[4096];
 		calc::shunting_yard_parse(str.c_str(), tokens);
-		dst.composite([=](int, int) {
+		dst.composite([=](int x, int y) {
 			double res = 0;
+			calc::shunting_yard_set_var('x', x, (void*)tokens);
+			calc::shunting_yard_set_var('y', y, (void*)tokens);
 			calc::shunting_yard_eval((void*)tokens, &res);
 			return Color(res) * tint;
 		}, op);

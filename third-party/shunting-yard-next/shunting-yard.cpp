@@ -61,6 +61,7 @@ typedef struct {
 	MathFunc func;
 	double num;
 	char op;
+	char var;
 } Token;
 
 typedef enum {
@@ -101,7 +102,7 @@ typedef struct {
 #define STACK_POP(stack) (stack)->values[--(stack)->size]
 #define STACK_TOP(stack) (stack)->values[(stack)->size-1]
 
-static const Token NO_TOKEN = {TOKEN_NONE, NULL, 0, 0};
+static const Token NO_TOKEN = {TOKEN_NONE, NULL, 0, 0, 0};
 
 static const Operator OPERATORS[] = {
 	{'!', 1, OPERATOR_UNARY,  OPERATOR_LEFT},
@@ -153,7 +154,7 @@ void shunting_yard_parse(const char *expression, void *mem) {
 	int length = 0;
 	const char *c = expression;
 	while (*c) {
-		Token token = {TOKEN_UNKNOWN, NULL, 0, 0};
+		Token token = {TOKEN_UNKNOWN, NULL, 0, 0, 0};
 		size_t tokenLength = 0;
 		if (*c == '(')
 			token.type = TOKEN_OPEN_PARENTHESIS;
@@ -177,14 +178,22 @@ void shunting_yard_parse(const char *expression, void *mem) {
 				}
 			}
 			// Check function
-			for (auto& f : funcs) {
-				int l = strlen(f.name);
-				if (strncmp(c, f.name, l) == 0) {
-					token.type = TOKEN_IDENTIFIER;
-					token.func = f.func;
-					tokenLength = l;
-					break;
+			if (!tokenLength) {
+				for (auto& f : funcs) {
+					int l = strlen(f.name);
+					if (strncmp(c, f.name, l) == 0) {
+						token.type = TOKEN_IDENTIFIER;
+						token.func = f.func;
+						tokenLength = l;
+						break;
+					}
 				}
+			}
+			// Assume variable
+			if (!tokenLength) {
+				token.type = TOKEN_NUMBER;
+				token.num = 0;
+				token.var = *c;
 			}
 		}
 		if (!isspace(*c)) {
@@ -193,6 +202,17 @@ void shunting_yard_parse(const char *expression, void *mem) {
 		c += tokenLength ? tokenLength : 1;
 	}
 	tokens[length] = NO_TOKEN;
+}
+
+void shunting_yard_set_var(char var, double value, void *mem) {
+	Token* tokens = (Token*)mem;
+	int i = 0;
+	while (tokens[i].type != TOKEN_NONE) {
+		Token& token = tokens[i];
+		if (token.type == TOKEN_NUMBER && token.var == var)
+			token.num = value;
+		++i;
+	}
 }
 
 Status shunting_yard_eval(void *mem, double *result) {
