@@ -15,6 +15,37 @@
 
 namespace calc {
 
+typedef struct {
+	const char* name;
+	double value;
+} Constant;
+
+Constant consts[] = {
+	{ "pi", M_PI },
+	{ "tau", M_PI * 2 },
+	{ "e", M_E }
+};
+
+typedef double (*MathFunc)(double);
+
+typedef struct {
+	const char* name;
+	MathFunc func;
+} Function;
+
+Function funcs[] = {
+	{ "abs", fabs },
+	{ "sqrt", sqrt },
+	{ "ln", log },
+	{ "lb", log2 },
+	{ "lg", log10 },
+	{ "log", log10 },
+	{ "cos", cos },
+	{ "sin", sin },
+	{ "tan", tan },
+	{ "exp", exp }
+};
+
 typedef enum {
 	TOKEN_NONE,
 	TOKEN_UNKNOWN,
@@ -27,8 +58,8 @@ typedef enum {
 
 typedef struct {
 	TokenType type;
+	MathFunc func;
 	double num;
-	char *value;
 	char op;
 } Token;
 
@@ -63,14 +94,14 @@ typedef struct {
 
 typedef struct {
 	int size;
-	const char* values[FUNCTION_STACK_SIZE];
+	MathFunc values[FUNCTION_STACK_SIZE];
 } FunctionStack;
 
 #define STACK_PUSH(stack, value) (stack)->values[(stack)->size++] = (value)
 #define STACK_POP(stack) (stack)->values[--(stack)->size]
 #define STACK_TOP(stack) (stack)->values[(stack)->size-1]
 
-static const Token NO_TOKEN = {TOKEN_NONE, 0, NULL, 0};
+static const Token NO_TOKEN = {TOKEN_NONE, NULL, 0, 0};
 
 static const Operator OPERATORS[] = {
 	{'!', 1, OPERATOR_UNARY,  OPERATOR_LEFT},
@@ -95,9 +126,6 @@ static Status push_operator(const Operator *op, OperandStack *operands, Operator
 // Pushes the multiplication operator to the stack.
 static Status push_multiplication(OperandStack *operands, OperatorStack *operators);
 
-// Converts a constant identifier into its value and pushes it to the stack.
-static Status push_constant(const char *value, OperandStack *operands);
-
 // Applies an operator to the top one or two operands, depending on if the
 // operator is unary or binary.
 static Status apply_operator(const Operator *op, OperandStack *operands);
@@ -106,7 +134,7 @@ static Status apply_operator(const Operator *op, OperandStack *operands);
 static Status apply_unary_operator(const Operator *op, OperandStack *operands);
 
 // Applies a function to the top operand.
-static Status apply_function(const char *function, OperandStack *operands);
+static Status apply_function(MathFunc function, OperandStack *operands);
 
 // Returns the arity of an operator, using the previous token for context.
 static OperatorArity get_arity(char symbol, const Token *previous);
@@ -125,8 +153,8 @@ void shunting_yard_parse(const char *expression, void *mem) {
 	int length = 0;
 	const char *c = expression;
 	while (*c) {
-		Token token = {TOKEN_UNKNOWN, 0, NULL, 0};
-		size_t tokenLength = 1;
+		Token token = {TOKEN_UNKNOWN, NULL, 0, 0};
+		size_t tokenLength = 0;
 		if (*c == '(')
 			token.type = TOKEN_OPEN_PARENTHESIS;
 		else if (*c == ')')
@@ -137,14 +165,32 @@ void shunting_yard_parse(const char *expression, void *mem) {
 		} else if (isdigit(*c) || *c == '.') {
 			token.type = TOKEN_NUMBER;
 			token.num = std::stod(c, &tokenLength);
-		} else if (sscanf(c, "%m[A-Za-z]", &token.value)) {
-			token.type = TOKEN_IDENTIFIER;
-			tokenLength = strlen(token.value);
+		} else if ((*c >= 'a' && *c <= 'z') || (*c >= 'A' && *c <= 'Z')) {
+			// Check constant
+			for (auto& constant : consts) {
+				int l = strlen(constant.name);
+				if (strncmp(c, constant.name, l) == 0) {
+					token.type = TOKEN_NUMBER;
+					token.num = constant.value;
+					tokenLength = l;
+					break;
+				}
+			}
+			// Check function
+			for (auto& f : funcs) {
+				int l = strlen(f.name);
+				if (strncmp(c, f.name, l) == 0) {
+					token.type = TOKEN_IDENTIFIER;
+					token.func = f.func;
+					tokenLength = l;
+					break;
+				}
+			}
 		}
 		if (!isspace(*c)) {
 			tokens[length++] = token;
 		}
-		c += tokenLength;
+		c += tokenLength ? tokenLength : 1;
 	}
 	tokens[length] = NO_TOKEN;
 }
@@ -159,8 +205,6 @@ Status shunting_yard_eval(void *mem, double *result) {
 		*result = round(STACK_POP(&operands) * 10e14) / 10e14;
 	else if (status == OK)
 		status = ERROR_NO_INPUT;
-	//for (Token *token = tokens; token->type != TOKEN_NONE; token++)
-	//	free(token->value);
 	return status;
 }
 
@@ -213,10 +257,8 @@ Status eval(const Token *tokens, OperandStack *operands, OperatorStack *operator
 				break;
 
 			case TOKEN_IDENTIFIER:
-				// The identifier could be either a constant or function.
-				status = push_constant(token->value, operands);
-				if (status == ERROR_UNDEFINED_CONSTANT && next->type == TOKEN_OPEN_PARENTHESIS) {
-					STACK_PUSH(functions, token->value);
+				if (next->type == TOKEN_OPEN_PARENTHESIS) {
+					STACK_PUSH(functions, token->func);
 					status = OK;
 				} else if (next->type == TOKEN_OPEN_PARENTHESIS ||
 						   next->type == TOKEN_IDENTIFIER) {
@@ -263,22 +305,7 @@ Status push_operator(const Operator *op, OperandStack *operands, OperatorStack *
 }
 
 Status push_multiplication(OperandStack *operands, OperatorStack *operators) {
-	return push_operator(get_operator('*', OPERATOR_BINARY), operands,
-						 operators);
-}
-
-Status push_constant(const char *value, OperandStack *operands) {
-	double x = 0.0;
-	if (strcasecmp(value, "e") == 0)
-		x = M_E;
-	else if (strcasecmp(value, "pi") == 0)
-		x = M_PI;
-	else if (strcasecmp(value, "tau") == 0)
-		x = M_PI * 2;
-	else
-		return ERROR_UNDEFINED_CONSTANT;
-	STACK_PUSH(operands, x);
-	return OK;
+	return push_operator(get_operator('*', OPERATOR_BINARY), operands, operators);
 }
 
 Status apply_operator(const Operator *op, OperandStack *operands) {
@@ -336,30 +363,13 @@ Status apply_unary_operator(const Operator *op, OperandStack *operands) {
 	return OK;
 }
 
-Status apply_function(const char *function, OperandStack *operands) {
+Status apply_function(MathFunc function, OperandStack *operands) {
 	if (!operands->size)
 		return ERROR_FUNCTION_ARGUMENTS;
-
-	double x = STACK_POP(operands);
-	if (strcasecmp(function, "abs") == 0)
-		x = fabs(x);
-	else if (strcasecmp(function, "sqrt") == 0)
-		x = sqrt(x);
-	else if (strcasecmp(function, "ln") == 0)
-		x = log(x);
-	else if (strcasecmp(function, "lb") == 0)
-		x = log2(x);
-	else if (strcasecmp(function, "lg") == 0 ||
-			 strcasecmp(function, "log") == 0)
-		x = log10(x);
-	else if (strcasecmp(function, "cos") == 0)
-		x = cos(x);
-	else if (strcasecmp(function, "sin") == 0)
-		x = sin(x);
-	else if (strcasecmp(function, "tan") == 0)
-		x = tan(x);
-	else
+	if (!function)
 		return ERROR_UNDEFINED_FUNCTION;
+	double x = STACK_POP(operands);
+	x = function(x);
 	STACK_PUSH(operands, x);
 	return OK;
 }
@@ -367,7 +377,7 @@ Status apply_function(const char *function, OperandStack *operands) {
 OperatorArity get_arity(char symbol, const Token *previous) {
 	if (symbol == '!' || previous->type == TOKEN_NONE ||
 			previous->type == TOKEN_OPEN_PARENTHESIS ||
-			(previous->type == TOKEN_OPERATOR && *previous->value != '!'))
+			(previous->type == TOKEN_OPERATOR && previous->op != '!'))
 		return OPERATOR_UNARY;
 	return OPERATOR_BINARY;
 }
