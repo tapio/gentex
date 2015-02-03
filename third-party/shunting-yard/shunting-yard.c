@@ -295,13 +295,13 @@ Status push_constant(const char *value, OperandStack *operands) {
 }
 
 Status apply_operator(const Operator *operator, OperandStack *operands) {
-    if (!operator || !operands)
+    if (!operator || !operands->size)
         return ERROR_SYNTAX;
     if (operator->arity == OPERATOR_UNARY)
         return apply_unary_operator(operator, operands);
 
     double y = STACK_POP(operands);
-    if (!operands)
+    if (!operands->size)
         return ERROR_SYNTAX;
     double x = STACK_POP(operands);
     Status status = OK;
@@ -350,7 +350,7 @@ Status apply_unary_operator(const Operator *operator, OperandStack *operands) {
 }
 
 Status apply_function(const char *function, OperandStack *operands) {
-    if (!operands)
+    if (!operands->size)
         return ERROR_FUNCTION_ARGUMENTS;
 
     double x = STACK_POP(operands);
