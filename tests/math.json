@@ -12,7 +12,7 @@
 		{ "add": "const", "tint": "#888888" }
 	]
 },{
-	"size": [ 256, 256 ],
+	"size": [ 1024, 1024 ],
 	"out": "mathtest_calc.tga",
 	"ops": [
 		{ "add": "const", "tint": "abs(cos(pi)) * 0.5 + 0.5 - 0.75" },
