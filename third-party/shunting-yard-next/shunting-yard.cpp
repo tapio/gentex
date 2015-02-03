@@ -11,6 +11,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <string>
 
 namespace calc {
 
@@ -26,7 +27,9 @@ typedef enum {
 
 typedef struct {
 	TokenType type;
+	double num;
 	char *value;
+	char op;
 } Token;
 
 typedef enum {
@@ -67,7 +70,7 @@ typedef struct {
 #define STACK_POP(stack) (stack)->values[--(stack)->size]
 #define STACK_TOP(stack) (stack)->values[(stack)->size-1]
 
-static const Token NO_TOKEN = {TOKEN_NONE, NULL};
+static const Token NO_TOKEN = {TOKEN_NONE, 0, NULL, 0};
 
 static const Operator OPERATORS[] = {
 	{'!', 1, OPERATOR_UNARY,  OPERATOR_LEFT},
@@ -95,9 +98,6 @@ static Status push_operator(const Operator *op, OperandStack *operands, Operator
 
 // Pushes the multiplication operator to the stack.
 static Status push_multiplication(OperandStack *operands, OperatorStack *operators);
-
-// Converts a string into a number and pushes it to the stack.
-static Status push_number(const char *value, OperandStack *operands);
 
 // Converts a constant identifier into its value and pushes it to the stack.
 static Status push_constant(const char *value, OperandStack *operands);
@@ -138,23 +138,26 @@ void tokenize(const char *expression, Token *tokens) {
 	int length = 0;
 	const char *c = expression;
 	while (*c) {
-		Token token = {TOKEN_UNKNOWN, NULL};
+		Token token = {TOKEN_UNKNOWN, 0, NULL, 0};
+		size_t tokenLength = 1;
 		if (*c == '(')
 			token.type = TOKEN_OPEN_PARENTHESIS;
 		else if (*c == ')')
 			token.type = TOKEN_CLOSE_PARENTHESIS;
 		else if (strchr("!^*/%+-", *c)) {
 			token.type = TOKEN_OPERATOR;
-			token.value = strndup(c, 1);
-		} else if (sscanf(c, "%m[0-9.]", &token.value))
+			token.op = *c;
+		} else if (isdigit(*c) || *c == '.') {
 			token.type = TOKEN_NUMBER;
-		else if (sscanf(c, "%m[A-Za-z]", &token.value))
+			token.num = std::stod(c, &tokenLength);
+		} else if (sscanf(c, "%m[A-Za-z]", &token.value)) {
 			token.type = TOKEN_IDENTIFIER;
-
+			tokenLength = strlen(token.value);
+		}
 		if (!isspace(*c)) {
 			tokens[length++] = token;
 		}
-		c += token.value ? strlen(token.value) : 1;
+		c += tokenLength;
 	}
 	tokens[length] = NO_TOKEN;
 }
@@ -190,10 +193,7 @@ Status parse(const Token *tokens, OperandStack *operands, OperatorStack *operato
 			}
 
 			case TOKEN_OPERATOR:
-				status = push_operator(
-					get_operator(*token->value,
-								 get_arity(*token->value, previous)),
-					operands, operators);
+				status = push_operator(get_operator(token->op, get_arity(token->op, previous)), operands, operators);
 				break;
 
 			case TOKEN_NUMBER:
@@ -202,11 +202,10 @@ Status parse(const Token *tokens, OperandStack *operands, OperatorStack *operato
 						previous->type == TOKEN_IDENTIFIER)
 					status = ERROR_SYNTAX;
 				else {
-					status = push_number(token->value, operands);
+					STACK_PUSH(operands, token->num);
 
 					// Implicit multiplication: "2(2)" or "2a".
-					if (next->type == TOKEN_OPEN_PARENTHESIS ||
-							next->type == TOKEN_IDENTIFIER)
+					if (next->type == TOKEN_OPEN_PARENTHESIS || next->type == TOKEN_IDENTIFIER)
 						status = push_multiplication(operands, operators);
 				}
 				break;
@@ -214,8 +213,7 @@ Status parse(const Token *tokens, OperandStack *operands, OperatorStack *operato
 			case TOKEN_IDENTIFIER:
 				// The identifier could be either a constant or function.
 				status = push_constant(token->value, operands);
-				if (status == ERROR_UNDEFINED_CONSTANT &&
-						next->type == TOKEN_OPEN_PARENTHESIS) {
+				if (status == ERROR_UNDEFINED_CONSTANT && next->type == TOKEN_OPEN_PARENTHESIS) {
 					STACK_PUSH(functions, token->value);
 					status = OK;
 				} else if (next->type == TOKEN_OPEN_PARENTHESIS ||
@@ -265,17 +263,6 @@ Status push_operator(const Operator *op, OperandStack *operands, OperatorStack *
 Status push_multiplication(OperandStack *operands, OperatorStack *operators) {
 	return push_operator(get_operator('*', OPERATOR_BINARY), operands,
 						 operators);
-}
-
-Status push_number(const char *value, OperandStack *operands) {
-	char *end_pointer = NULL;
-	double x = strtod(value, &end_pointer);
-
-	// If not all of the value is converted, the rest is invalid.
-	if (value + strlen(value) != end_pointer)
-		return ERROR_SYNTAX;
-	STACK_PUSH(operands, x);
-	return OK;
 }
 
 Status push_constant(const char *value, OperandStack *operands) {
