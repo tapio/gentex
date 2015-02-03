@@ -245,8 +245,8 @@ std::map<std::string, CommandFunction> s_cmds = {
 	{ "calc", [](Image& dst, CompositeFunction op, const Json& params) {
 		const std::string& str = params["expr"].string_value();
 		Color tint = parseColor("tint", params);
+		postfix_t postfix = infix2postfix(str);
 		dst.composite([=](int, int) {
-			postfix_t postfix = infix2postfix(str);
 			float res = evalpostfix(postfix);
 			return Color(res) * tint;
 		}, op);
