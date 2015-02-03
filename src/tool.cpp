@@ -93,8 +93,6 @@ int main(int argc, char** argv) {
 	if (paths.empty())
 		panic("specify input file");
 
-	initMathParser();
-
 	int failCount = 0;
 	std::vector<std::string> texts;
 	for (const auto& path: paths) {

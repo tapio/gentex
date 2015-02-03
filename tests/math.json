@@ -15,15 +15,8 @@
 	"size": [ 256, 256 ],
 	"out": "mathtest_calc.tga",
 	"ops": [
-		{ "add": "const", "tint": "=abs(cos(pi)) * 0.5 + 0.5 - 0.75" },
-		{ "add": "calc", "expr": "abs(cos(pi)) * 0.5 + 0.5 - 0.75" }
-	]
-},{
-	"size": [ 256, 256 ],
-	"out": "mathtest_shun.tga",
-	"ops": [
-		{ "add": "const", "tint": "?abs(cos(pi)) * 0.5 + 0.5 - 0.75" },
-		{ "add": "shun", "expr": "abs(cos(pi + x/10)) * 0.5 + 0.5 - 0.75" }
+		{ "add": "const", "tint": "abs(cos(pi)) * 0.5 + 0.5 - 0.75" },
+		{ "add": "calc", "expr": "abs(cos(pi + x/10)) * 0.5 + 0.5 - 0.75" }
 	]
 }
 ]
