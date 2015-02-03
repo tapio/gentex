@@ -8,6 +8,7 @@
 extern "C" {
 #include "shunting-yard/shunting-yard.h"
 }
+#include "shunting-yard-next/shunting-yard.hpp"
 
 namespace gentex {
 
@@ -256,7 +257,7 @@ std::map<std::string, CommandFunction> s_cmds = {
 		Color tint = parseColor("tint", params);
 		dst.composite([=](int, int) {
 			double res = 0;
-			shunting_yard(str.c_str(), &res);
+			calc::shunting_yard(str.c_str(), &res);
 			return Color(res) * tint;
 		}, op);
 	}},
