@@ -17,12 +17,16 @@ Parts of the project are inspired by mrdoob's [texgen.js](https://github.com/mrd
 * sin
 * or / xor
 * pow (clouds)
+* rectangle
+* circle
+* custom mathematical expression
 
 ## Tool Features
 
 * TGA output
 * Watch files for changes and automatically regenerate textures
 * Files can contain multiple output textures
+* Outputs how long each texture took to generate
 
 ## Usage Example
 
