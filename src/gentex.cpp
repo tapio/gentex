@@ -275,15 +275,19 @@ void Image::writeTGA(const std::string& filepath) const {
 	tgaout << static_cast<char>((h >> 8) & 0xff);
 	tgaout << static_cast<char>(24); // Bits per pixel
 	tgaout << static_cast<char>(0x00);  // No special flags
+	std::vector<char> pixbuf;
+	pixbuf.resize(w * h * 3);
 	// Image data
+	int i = 0;
 	for (int y = h-1; y >= 0; --y) {
 		for (int x = 0; x < w; ++x) {
 			const Color pix = saturate(get(x, y));
-			tgaout << static_cast<unsigned char>(pix.b * 255);
-			tgaout << static_cast<unsigned char>(pix.g * 255);
-			tgaout << static_cast<unsigned char>(pix.r * 255);
+			pixbuf[i++] = static_cast<unsigned char>(pix.b * 255);
+			pixbuf[i++] = static_cast<unsigned char>(pix.g * 255);
+			pixbuf[i++] = static_cast<unsigned char>(pix.r * 255);
 		}
 	}
+	tgaout.write(&pixbuf[0], pixbuf.size());
 }
 
 } // namespace
