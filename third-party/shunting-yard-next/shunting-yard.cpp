@@ -1,4 +1,5 @@
 // Copyright 2011 - 2014 Brian Marshall. All rights reserved.
+// Copyright 2015 Tapio Vierros.
 //
 // Use of this source code is governed by the BSD 2-Clause License that can be
 // found in the LICENSE file.
