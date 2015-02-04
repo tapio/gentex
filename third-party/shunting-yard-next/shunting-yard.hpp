@@ -7,6 +7,7 @@
 #pragma once
 
 #include <string>
+#include <vector>
 
 namespace calc {
 
@@ -22,7 +23,18 @@ enum Status {
 	ERROR_UNDEFINED_CONSTANT
 };
 
+// std::function is much slower...
 typedef double (*MathFunc)(double);
+
+struct Function {
+	const char* name;
+	MathFunc func;
+};
+
+struct Constant {
+	const char* name;
+	double value;
+};
 
 enum TokenType {
 	TOKEN_NONE,
@@ -42,7 +54,6 @@ struct Token {
 	char var;
 };
 
-
 struct MathExpression
 {
 	static const int MAX_TOKENS = 128;
@@ -50,6 +61,9 @@ struct MathExpression
 	MathExpression(const std::string& expr);
 	void setVar(char var, double value);
 	double eval(Status* status = 0);
+
+	static std::vector<Function> funcs;
+	static std::vector<Constant> consts;
 
 private:
 	Token tokens[MAX_TOKENS];

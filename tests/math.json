@@ -18,5 +18,12 @@
 		{ "add": "const", "tint": "abs(cos(pi)) * 0.5 + 0.5 - 0.75" },
 		{ "add": "calc", "expr": "abs(cos(pi + x/10)) * 0.5 + 0.5 - 0.75" }
 	]
+},{
+	"size": [ 1024, 1024 ],
+	"out": "mathtest_noise.tga",
+	"ops": [
+		{ "add": "calc", "expr": "perlin(x*0.01)" },
+		{ "mul": "calc", "expr": "perlin(w+y*0.011)" }
+	]
 }
 ]

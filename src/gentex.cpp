@@ -238,9 +238,12 @@ std::map<std::string, CommandFunction> s_cmds = {
 		const std::string& str = params["expr"].string_value();
 		Color tint = parseColor("tint", params);
 		calc::MathExpression expr(str);
-		dst.composite([&](int x, int y) {
+		double w = dst.w, h = dst.h;
+		dst.composite([=, &expr](int x, int y) {
 			expr.setVar('x', x);
 			expr.setVar('y', y);
+			expr.setVar('w', w);
+			expr.setVar('h', h);
 			return Color(expr.eval()) * tint;
 		}, op);
 	}},
@@ -250,6 +253,9 @@ CommandFunction& getCommand(const std::string& name) {
 	return s_cmds[name];
 }
 
+void initMathParser() {
+	calc::MathExpression::funcs.push_back({"perlin", [](double x)->double{ return perlin(vec2(x, 0.f)) * 0.5f + 0.5f; }});
+}
 
 // Image class
 

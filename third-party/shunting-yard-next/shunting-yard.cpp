@@ -8,7 +8,6 @@
 
 #include <ctype.h>
 #include <math.h>
-#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -16,23 +15,13 @@
 
 namespace calc {
 
-typedef struct {
-	const char* name;
-	double value;
-} Constant;
-
-Constant consts[] = {
+/*static*/ std::vector<Constant> MathExpression::consts = {
 	{ "pi", M_PI },
 	{ "tau", M_PI * 2 },
 	{ "e", M_E }
 };
 
-typedef struct {
-	const char* name;
-	MathFunc func;
-} Function;
-
-Function funcs[] = {
+/*static*/ std::vector<Function> MathExpression::funcs = {
 	{ "abs", fabs },
 	{ "sqrt", sqrt },
 	{ "ln", log },
