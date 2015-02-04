@@ -5,25 +5,11 @@
 
 #pragma once
 
-#ifndef MAX_TOKENS
-#define MAX_TOKENS 128
-#endif
-
-#ifndef OPERAND_STACK_SIZE
-#define OPERAND_STACK_SIZE 64
-#endif
-
-#ifndef OPERATOR_STACK_SIZE
-#define OPERATOR_STACK_SIZE 64
-#endif
-
-#ifndef FUNCTION_STACK_SIZE
-#define FUNCTION_STACK_SIZE 64
-#endif
+#include <string>
 
 namespace calc {
 
-typedef enum {
+enum Status {
 	OK,
 	ERROR_SYNTAX,
 	ERROR_OPEN_PARENTHESIS,
@@ -33,13 +19,39 @@ typedef enum {
 	ERROR_UNDEFINED_FUNCTION,
 	ERROR_FUNCTION_ARGUMENTS,
 	ERROR_UNDEFINED_CONSTANT
-} Status;
+};
 
-// Calculates the result of a mathematical expression.
-Status shunting_yard(const char *expression, double *result);
+typedef double (*MathFunc)(double);
 
-void shunting_yard_parse(const char *expression, void *tokens);
-void shunting_yard_set_var(char var, double value, void *tokens);
-Status shunting_yard_eval(void* tokens, double *result);
+enum TokenType {
+	TOKEN_NONE,
+	TOKEN_UNKNOWN,
+	TOKEN_OPEN_PARENTHESIS,
+	TOKEN_CLOSE_PARENTHESIS,
+	TOKEN_OPERATOR,
+	TOKEN_NUMBER,
+	TOKEN_IDENTIFIER
+};
+
+struct Token {
+	TokenType type;
+	MathFunc func;
+	double num;
+	char op;
+	char var;
+};
+
+
+struct MathExpression
+{
+	static const int MAX_TOKENS = 128;
+
+	MathExpression(const std::string& expr);
+	void setVar(char var, double value);
+	double eval(Status* status = 0);
+
+private:
+	Token tokens[MAX_TOKENS];
+};
 
 } // namespace

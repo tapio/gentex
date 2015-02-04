@@ -26,8 +26,6 @@ Constant consts[] = {
 	{ "e", M_E }
 };
 
-typedef double (*MathFunc)(double);
-
 typedef struct {
 	const char* name;
 	MathFunc func;
@@ -45,24 +43,6 @@ Function funcs[] = {
 	{ "tan", tan },
 	{ "exp", exp }
 };
-
-typedef enum {
-	TOKEN_NONE,
-	TOKEN_UNKNOWN,
-	TOKEN_OPEN_PARENTHESIS,
-	TOKEN_CLOSE_PARENTHESIS,
-	TOKEN_OPERATOR,
-	TOKEN_NUMBER,
-	TOKEN_IDENTIFIER
-} TokenType;
-
-typedef struct {
-	TokenType type;
-	MathFunc func;
-	double num;
-	char op;
-	char var;
-} Token;
 
 typedef enum {
 	OPERATOR_OTHER,
@@ -85,17 +65,17 @@ typedef struct {
 
 typedef struct {
 	int size;
-	double values[OPERAND_STACK_SIZE];
+	double values[MathExpression::MAX_TOKENS];
 } OperandStack;
 
 typedef struct {
 	int size;
-	const Operator* values[OPERATOR_STACK_SIZE];
+	const Operator* values[MathExpression::MAX_TOKENS];
 } OperatorStack;
 
 typedef struct {
 	int size;
-	MathFunc values[FUNCTION_STACK_SIZE];
+	MathFunc values[MathExpression::MAX_TOKENS];
 } FunctionStack;
 
 #define STACK_PUSH(stack, value) (stack)->values[(stack)->size++] = (value)
@@ -143,90 +123,6 @@ static OperatorArity get_arity(char symbol, const Token *previous);
 // Returns a matching operator.
 static const Operator *get_operator(char symbol, OperatorArity arity);
 
-Status shunting_yard(const char *expression, double *result) {
-	Token tokens[MAX_TOKENS];
-	shunting_yard_parse(expression, tokens);
-	return shunting_yard_eval(tokens, result);
-}
-
-void shunting_yard_parse(const char *expression, void *mem) {
-	Token* tokens = (Token*)mem;
-	int length = 0;
-	const char *c = expression;
-	while (*c) {
-		Token token = {TOKEN_UNKNOWN, NULL, 0, 0, 0};
-		size_t tokenLength = 0;
-		if (*c == '(')
-			token.type = TOKEN_OPEN_PARENTHESIS;
-		else if (*c == ')')
-			token.type = TOKEN_CLOSE_PARENTHESIS;
-		else if (strchr("!^*/%+-", *c)) {
-			token.type = TOKEN_OPERATOR;
-			token.op = *c;
-		} else if (isdigit(*c) || *c == '.') {
-			token.type = TOKEN_NUMBER;
-			token.num = std::stod(c, &tokenLength);
-		} else if ((*c >= 'a' && *c <= 'z') || (*c >= 'A' && *c <= 'Z')) {
-			// Check constant
-			for (auto& constant : consts) {
-				int l = strlen(constant.name);
-				if (strncmp(c, constant.name, l) == 0) {
-					token.type = TOKEN_NUMBER;
-					token.num = constant.value;
-					tokenLength = l;
-					break;
-				}
-			}
-			// Check function
-			if (!tokenLength) {
-				for (auto& f : funcs) {
-					int l = strlen(f.name);
-					if (strncmp(c, f.name, l) == 0) {
-						token.type = TOKEN_IDENTIFIER;
-						token.func = f.func;
-						tokenLength = l;
-						break;
-					}
-				}
-			}
-			// Assume variable
-			if (!tokenLength) {
-				token.type = TOKEN_NUMBER;
-				token.num = 0;
-				token.var = *c;
-			}
-		}
-		if (!isspace(*c)) {
-			tokens[length++] = token;
-		}
-		c += tokenLength ? tokenLength : 1;
-	}
-	tokens[length] = NO_TOKEN;
-}
-
-void shunting_yard_set_var(char var, double value, void *mem) {
-	Token* tokens = (Token*)mem;
-	int i = 0;
-	while (tokens[i].type != TOKEN_NONE) {
-		Token& token = tokens[i];
-		if (token.type == TOKEN_NUMBER && token.var == var)
-			token.num = value;
-		++i;
-	}
-}
-
-Status shunting_yard_eval(void *mem, double *result) {
-	Token* tokens = (Token*)mem;
-	OperandStack operands; operands.size = 0;
-	OperatorStack operators; operators.size = 0;
-	FunctionStack functions; functions.size = 0;
-	Status status = eval(tokens, &operands, &operators, &functions);
-	if (operands.size)
-		*result = round(STACK_POP(&operands) * 10e14) / 10e14;
-	else if (status == OK)
-		status = ERROR_NO_INPUT;
-	return status;
-}
 
 Status eval(const Token *tokens, OperandStack *operands, OperatorStack *operators, FunctionStack *functions) {
 	Status status = OK;
@@ -408,6 +304,88 @@ const Operator *get_operator(char symbol, OperatorArity arity) {
 			return &OPERATORS[i];
 	}
 	return NULL;
+}
+
+MathExpression::MathExpression(const std::string& expr)
+{
+	int length = 0;
+	const char *c = expr.c_str();
+	while (*c) {
+		Token token = {TOKEN_UNKNOWN, NULL, 0, 0, 0};
+		size_t tokenLength = 0;
+		if (*c == '(')
+			token.type = TOKEN_OPEN_PARENTHESIS;
+		else if (*c == ')')
+			token.type = TOKEN_CLOSE_PARENTHESIS;
+		else if (strchr("!^*/%+-", *c)) {
+			token.type = TOKEN_OPERATOR;
+			token.op = *c;
+		} else if (isdigit(*c) || *c == '.') {
+			token.type = TOKEN_NUMBER;
+			token.num = std::stod(c, &tokenLength);
+		} else if ((*c >= 'a' && *c <= 'z') || (*c >= 'A' && *c <= 'Z')) {
+			// Check constant
+			for (auto& constant : consts) {
+				int l = strlen(constant.name);
+				if (strncmp(c, constant.name, l) == 0) {
+					token.type = TOKEN_NUMBER;
+					token.num = constant.value;
+					tokenLength = l;
+					break;
+				}
+			}
+			// Check function
+			if (!tokenLength) {
+				for (auto& f : funcs) {
+					int l = strlen(f.name);
+					if (strncmp(c, f.name, l) == 0) {
+						token.type = TOKEN_IDENTIFIER;
+						token.func = f.func;
+						tokenLength = l;
+						break;
+					}
+				}
+			}
+			// Assume variable
+			if (!tokenLength) {
+				token.type = TOKEN_NUMBER;
+				token.num = 0;
+				token.var = *c;
+			}
+		}
+		if (!isspace(*c)) {
+			tokens[length++] = token;
+		}
+		c += tokenLength ? tokenLength : 1;
+	}
+	tokens[length] = NO_TOKEN;
+}
+
+void MathExpression::setVar(char var, double value)
+{
+	int i = 0;
+	while (tokens[i].type != TOKEN_NONE) {
+		Token& token = tokens[i];
+		if (token.type == TOKEN_NUMBER && token.var == var)
+			token.num = value;
+		++i;
+	}
+}
+
+double MathExpression::eval(Status* status)
+{
+	OperandStack operands; operands.size = 0;
+	OperatorStack operators; operators.size = 0;
+	FunctionStack functions; functions.size = 0;
+	Status err = calc::eval(tokens, &operands, &operators, &functions);
+	double result = 0.0;
+	if (operands.size)
+		result = round(STACK_POP(&operands) * 10e14) / 10e14;
+	else if (err == OK)
+		err = ERROR_NO_INPUT;
+	if (status)
+		*status = err;
+	return result;
 }
 
 } // namespace

@@ -32,9 +32,8 @@ inline Color parseColor(const Json& param, Color def = Color(1.f)) {
 		} else if (str[0] == '#') {
 			std::cerr << "malformed hex color string \"" << str << "\"" << std::endl;
 		} else {
-			double res = 0;
-			calc::shunting_yard(str.substr(1).c_str(), &res);
-			return Color(res);
+			calc::MathExpression expr(str);
+			return Color(expr.eval());
 		}
 	}
 	return def;
@@ -238,14 +237,11 @@ std::map<std::string, CommandFunction> s_cmds = {
 	{ "calc", [](Image& dst, CompositeFunction op, const Json& params) {
 		const std::string& str = params["expr"].string_value();
 		Color tint = parseColor("tint", params);
-		char tokens[4096];
-		calc::shunting_yard_parse(str.c_str(), tokens);
-		dst.composite([=](int x, int y) {
-			double res = 0;
-			calc::shunting_yard_set_var('x', x, (void*)tokens);
-			calc::shunting_yard_set_var('y', y, (void*)tokens);
-			calc::shunting_yard_eval((void*)tokens, &res);
-			return Color(res) * tint;
+		calc::MathExpression expr(str);
+		dst.composite([&](int x, int y) {
+			expr.setVar('x', x);
+			expr.setVar('y', y);
+			return Color(expr.eval()) * tint;
 		}, op);
 	}},
 };
