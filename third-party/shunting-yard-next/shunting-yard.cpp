@@ -152,15 +152,15 @@ Status eval(const Token *tokens, OperandStack *operands, OperatorStack *operator
 				break;
 
 			case TOKEN_NUMBER:
-				if (previous->type == TOKEN_CLOSE_PARENTHESIS ||
-						previous->type == TOKEN_NUMBER ||
-						previous->type == TOKEN_IDENTIFIER)
+				if (previous->type == TOKEN_CLOSE_PARENTHESIS || previous->type == TOKEN_IDENTIFIER)
 					status = ERROR_SYNTAX;
 				else {
 					STACK_PUSH(operands, token->num);
 
 					// Implicit multiplication: "2(2)" or "2a".
-					if (next->type == TOKEN_OPEN_PARENTHESIS || next->type == TOKEN_IDENTIFIER)
+					if (next->type == TOKEN_OPEN_PARENTHESIS ||
+						next->type == TOKEN_IDENTIFIER ||
+						next->type == TOKEN_NUMBER)
 						status = push_multiplication(operands, operators);
 				}
 				break;
@@ -170,7 +170,8 @@ Status eval(const Token *tokens, OperandStack *operands, OperatorStack *operator
 					STACK_PUSH(functions, token->func);
 					status = OK;
 				} else if (next->type == TOKEN_OPEN_PARENTHESIS ||
-						   next->type == TOKEN_IDENTIFIER) {
+						   next->type == TOKEN_IDENTIFIER ||
+						   next->type == TOKEN_NUMBER) {
 					// Implicit multiplication: "a(2)" or "a b".
 					status = push_multiplication(operands, operators);
 				}
