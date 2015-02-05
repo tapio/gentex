@@ -84,8 +84,11 @@ static const Operator OPERATORS[] = {
 	{'%', 4, OPERATOR_BINARY, OPERATOR_LEFT},
 	{'+', 5, OPERATOR_BINARY, OPERATOR_LEFT},
 	{'-', 5, OPERATOR_BINARY, OPERATOR_LEFT},
-	{'(', 6, OPERATOR_OTHER,  OPERATOR_NONE}
+	{'<', 6, OPERATOR_BINARY, OPERATOR_LEFT},
+	{'>', 6, OPERATOR_BINARY, OPERATOR_LEFT},
+	{'(', 7, OPERATOR_OTHER,  OPERATOR_NONE}
 };
+static const char* allopers = "!^*/%+-<>";
 
 // Parses a tokenized expression.
 static Status eval(const Token *tokens, OperandStack *operands, OperatorStack *operators, FunctionStack *functions);
@@ -226,26 +229,15 @@ Status apply_operator(const Operator *op, OperandStack *operands) {
 	double x = STACK_POP(operands);
 	Status status = OK;
 	switch (op->symbol) {
-		case '^':
-			x = pow(x, y);
-			break;
-		case '*':
-			x = x * y;
-			break;
-		case '/':
-			x = x / y;
-			break;
-		case '%':
-			x = fmod(x, y);
-			break;
-		case '+':
-			x = x + y;
-			break;
-		case '-':
-			x = x - y;
-			break;
-		default:
-			return ERROR_UNRECOGNIZED;
+		case '^': x = pow(x, y); break;
+		case '*': x = x * y; break;
+		case '/': x = x / y; break;
+		case '%': x = fmod(x, y); break;
+		case '+': x = x + y; break;
+		case '-': x = x - y; break;
+		case '<': x = x < y ? 1.0 : 0.0; break;
+		case '>': x = x > y ? 1.0 : 0.0; break;
+		default: return ERROR_UNRECOGNIZED;
 	}
 	STACK_PUSH(operands, x);
 	return status;
@@ -307,7 +299,7 @@ MathExpression::MathExpression(const std::string& expr)
 			token.type = TOKEN_OPEN_PARENTHESIS;
 		else if (*c == ')')
 			token.type = TOKEN_CLOSE_PARENTHESIS;
-		else if (strchr("!^*/%+-", *c)) {
+		else if (strchr(allopers, *c)) {
 			token.type = TOKEN_OPERATOR;
 			token.op = *c;
 		} else if (isdigit(*c) || *c == '.') {
