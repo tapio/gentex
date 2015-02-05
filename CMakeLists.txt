@@ -35,9 +35,16 @@ include_directories(third-party)
 include_directories(src)
 
 # Files
-file(GLOB SOURCE_FILES "src/*.cpp")
-file(GLOB HEADER_FILES "src/*.hpp")
-file(GLOB_RECURSE LIB_FILES "third-party/*.cpp" "third-party/*.c")
-set(SOURCES ${SOURCE_FILES} ${HEADER_FILES} ${LIB_FILES})
+file(GLOB_RECURSE DEPS_SOURCES "third-party/*.cpp" "third-party/*.hpp" "third-party/*.c" "third-party/*.h")
+file(GLOB_RECURSE LIB_SOURCES "src/*.cpp" "src/*.hpp")
+file(GLOB_RECURSE TOOL_SOURCES "src/tool.cpp")
+list(REMOVE_ITEM LIB_SOURCES "src/tool.cpp")
 
-add_executable(gentex ${SOURCES})
+set(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR})
+set(LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR})
+link_directories(${PROJECT_BINARY_DIR})
+
+add_library(deps STATIC ${DEPS_SOURCES})
+add_library(gentexlib STATIC ${LIB_SOURCES})
+add_executable(gentex ${TOOL_SOURCES})
+target_link_libraries(gentex gentexlib deps)
