@@ -24,9 +24,9 @@ static int fails = 0;
 		std::cout << "Expression " << #expression << " failed with code " << status << std::endl; \
 		fails++; \
 	} else if (std::fabs(res - result) > 1e-6) { \
-		std::cout << "Expression " << #expression << " failed with code " << status << std::endl; \
+		std::cout << "Expression " << #expression << " failed: got " << res << ", expected " << result << std::endl; \
 		fails++; \
-	}\
+	} \
 } while(0);
 
 int main(int, char*[]) {
