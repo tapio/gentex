@@ -93,16 +93,13 @@ int main(int, char*[]) {
 	ASSERT_RESULT("abs(-5-7)", 12);
 	ASSERT_RESULT("abs(-1.1)", 1.1);
 	ASSERT_RESULT("sqrt(100)", 10);
-	ASSERT_RESULT("SqRt(100)", 10);
 	ASSERT_RESULT("sqrt(sqrt(10000))", 10);
 	ASSERT_RESULT("sqrt(sqrt(10000) + 800)", 30);
 	ASSERT_RESULT("42 * cos(0)", 42);
 	ASSERT_RESULT("(sin(0)*cos(0)*40*tan(0))-1", -1);
 	ASSERT_RESULT("log(10)", 1);
-	ASSERT_RESULT("lOG(10)", 1);
 	ASSERT_RESULT("lb(8)", 3);
 	ASSERT_RESULT("ln(e)", 1);
-	ASSERT_RESULT("Ln(E)", 1);
 	ASSERT_RESULT("log(10^42)", 42);
 	ASSERT_RESULT("lb(2^123)", 123);
 
@@ -110,9 +107,7 @@ int main(int, char*[]) {
 	ASSERT_RESULT("sin(pi)", 0);
 	ASSERT_RESULT("cos(pi)", -1);
 	ASSERT_RESULT("tan(pi)", 0);
-	ASSERT_RESULT("Tan(PI)", 0);
 	ASSERT_RESULT("cos(tau)", 1);
-	ASSERT_RESULT("COS(TAU)", 1);
 	ASSERT_RESULT("cos(2pi)", 1);
 	ASSERT_RESULT("((2pi/tau)+(10pi))/(1+10pi)", 1);
 	ASSERT_RESULT("2pi", 6.2831853071796);
