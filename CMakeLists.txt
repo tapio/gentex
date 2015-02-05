@@ -37,6 +37,7 @@ include_directories(src)
 # Files
 file(GLOB_RECURSE DEPS_SOURCES "third-party/*.cpp" "third-party/*.hpp" "third-party/*.c" "third-party/*.h")
 file(GLOB_RECURSE LIB_SOURCES "src/*.cpp" "src/*.hpp")
+file(GLOB_RECURSE TEST_SOURCES "tests/testmath.cpp")
 file(GLOB_RECURSE TOOL_SOURCES "src/tool.cpp")
 list(REMOVE_ITEM LIB_SOURCES "src/tool.cpp")
 
@@ -46,5 +47,9 @@ link_directories(${PROJECT_BINARY_DIR})
 
 add_library(deps STATIC ${DEPS_SOURCES})
 add_library(gentexlib STATIC ${LIB_SOURCES})
+
 add_executable(gentex ${TOOL_SOURCES})
 target_link_libraries(gentex gentexlib deps)
+
+add_executable(testmath ${TEST_SOURCES})
+target_link_libraries(testmath deps)
