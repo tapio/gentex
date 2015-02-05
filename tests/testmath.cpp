@@ -88,6 +88,14 @@ int main(int, char*[]) {
 	ASSERT_RESULT("5!", 120);
 	ASSERT_RESULT("3!+1", 7);
 
+	// Test comparison
+	ASSERT_RESULT("1 < 2", 1);
+	ASSERT_RESULT("1 > 2", 0);
+	ASSERT_RESULT("2.5 < 1.6", 0);
+	ASSERT_RESULT("2.5 > 1.6", 1);
+	ASSERT_RESULT("2 * 1 < 1.5", 0);
+	ASSERT_RESULT("2 * (1 < 1.5)", 2);
+
 	// Test functions
 	ASSERT_RESULT("abs(-32)", 32);
 	ASSERT_RESULT("abs(-5-7)", 12);
@@ -132,7 +140,8 @@ int main(int, char*[]) {
 	auto t1 = std::chrono::steady_clock::now();
 	auto dtms = std::chrono::duration_cast<std::chrono::milliseconds>(t1 - t0).count();
 
-	std::cout << (tests - fails) << "/" << tests << " tests succeeded" << std::endl;
+	std::cout << (tests - fails) << "/" << tests << " tests succeeded, " << fails << " failed";
+	std::cout << std::endl;
 	std::cout << "tests took " << dtms << " ms" << std::endl;
 
 	return fails;
