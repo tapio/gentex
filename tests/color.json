@@ -8,6 +8,7 @@
 		{ "add": "rect", "pos": [64, 0], "size": [32, 256], "tint": "#88ff88" },
 		{ "add": "rect", "pos": [96, 0], "size": [32, 256], "tint": "#FFFF88" },
 		{ "add": "rect", "pos": [128, 0], "size": [32, 256], "tint": "#7d7" },
-		{ "add": "rect", "pos": [160, 0], "size": [32, 256], "tint": "#DD7" }
+		{ "add": "rect", "pos": [160, 0], "size": [32, 256], "tint": "#DD7" },
+		{ "add": "rect", "pos": [192, 0], "size": [32, 256], "tint": [ "0.1+0.1", 0.5, "sin(pi/4)" ] }
 	]
 }

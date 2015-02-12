@@ -10,10 +10,32 @@ namespace gentex {
 
 inline float rnd() { return rand() / (float)RAND_MAX; }
 
+inline float parseFloat(const Json& param, float def = 0.f) {
+	if (param.is_number())
+		return param.number_value();
+	else if (param.is_string())
+		return calc::MathExpression::eval(param.string_value());
+	return def;
+}
+
+inline float parseFloat(const char* name, const Json& params, float def = 0.f) {
+	return parseFloat(params[name], def);
+}
+
+inline vec2 parseVec2(const char* name, const Json& params, vec2 def = vec2(0.f)) {
+	const Json& param = params[name];
+	if (param.is_array()) {
+		const auto& arr = param.array_items();
+		return vec2(parseFloat(arr[0], def.x), parseFloat(arr[1], def.y));
+	} else if (param.is_number() || param.is_string())
+		return vec2(parseFloat(param, def.x));
+	return def;
+}
+
 inline Color parseColor(const Json& param, Color def = Color(1.f)) {
 	if (param.is_array()) {
 		const auto& arr = param.array_items();
-		return Color(arr[0].number_value(), arr[1].number_value(), arr[2].number_value());
+		return Color(parseFloat(arr[0]), parseFloat(arr[1]), parseFloat(arr[2]));
 	} else if (param.is_number()) {
 		return Color(param.number_value());
 	} else if (param.is_string()) {
@@ -32,8 +54,7 @@ inline Color parseColor(const Json& param, Color def = Color(1.f)) {
 		} else if (str[0] == '#') {
 			std::cerr << "malformed hex color string \"" << str << "\"" << std::endl;
 		} else {
-			calc::MathExpression expr(str);
-			return Color(expr.eval());
+			return Color(calc::MathExpression::eval(str));
 		}
 	}
 	return def;
@@ -41,21 +62,6 @@ inline Color parseColor(const Json& param, Color def = Color(1.f)) {
 
 inline Color parseColor(const char* name, const Json& params, Color def = Color(1.f)) {
 	return parseColor(params[name], def);
-}
-
-inline vec2 parseVec2(const char* name, const Json& params, vec2 def = vec2(0.f)) {
-	const Json& param = params[name];
-	if (param.is_array()) {
-		const auto& arr = param.array_items();
-		return vec2(arr[0].number_value(), arr[1].number_value());
-	} else if (param.is_number())
-		return vec2(param.number_value());
-	return def;
-}
-
-inline float parseFloat(const char* name, const Json& params, float def = 0.f) {
-	const Json& param = params[name];
-	return param.is_number() ? param.number_value() : def;
 }
 
 struct ColorInterpolator {
