@@ -62,11 +62,22 @@ struct ColorInterpolator {
 	struct GradientPoint { float pos; Color color; };
 
 	ColorInterpolator(const Json& params) {
+		// TODO: More error checking
 		if (params["colors"].is_array()) {
 			const auto& colors = params["colors"].array_items();
+			float fstops[colors.size()];
+			for (uint i = 0; i < colors.size(); ++i)
+				fstops[i] = i / (colors.size() - 1.f);
+			if (params["stops"].is_array()) {
+				const auto& stops = params["stops"].array_items();
+				if (stops.size() == colors.size() - 2) {
+					for (uint i = 1; i < colors.size()-1; ++i)
+						fstops[i] = stops[i - 1].number_value();
+				} else std::cerr << "malformed gardient stop array, should have " << (colors.size() - 2) << " elements" << std::endl;
+			}
 			for (uint i = 0; i < colors.size(); ++i) {
 				points.push_back({
-					i / (colors.size() - 1.f),
+					fstops[i],
 					parseColor(colors[i])
 				});
 			}
