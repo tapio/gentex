@@ -13,7 +13,7 @@ Parts of the project are inspired by mrdoob's [texgen.js](https://github.com/mrd
 * perlin noise
 * simplex noise
 * fractal Brownian motion (fBm)
-* gradient
+* gradient map
 * sin
 * or / xor
 * pow ("clouds")
