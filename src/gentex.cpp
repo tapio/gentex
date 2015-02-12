@@ -252,17 +252,30 @@ std::map<std::string, CommandFunction> s_cmds = {
 		}, op);
 	}},
 	{ "calc", [](Image& dst, CompositeFunction op, const Json& params) {
-		const std::string& str = params["expr"].string_value();
 		Color tint = parseColor("tint", params);
-		calc::MathExpression expr(str);
 		double w = dst.w, h = dst.h;
-		dst.composite([=, &expr](int x, int y) {
-			expr.setVar('x', x);
-			expr.setVar('y', y);
-			expr.setVar('w', w);
-			expr.setVar('h', h);
-			return Color(expr.eval()) * tint;
-		}, op);
+		const Json& exprParam = params["expr"];
+		if (exprParam.is_string()) {
+			calc::MathExpression expr(exprParam.string_value());
+			dst.composite([=, &expr](int x, int y) {
+				expr.setVar('x', x);
+				expr.setVar('y', y);
+				expr.setVar('w', w);
+				expr.setVar('h', h);
+				return Color(expr.eval()) * tint;
+			}, op);
+		} else if (exprParam.is_array()) {
+			calc::MathExpression r(exprParam.array_items()[0].string_value());
+			calc::MathExpression g(exprParam.array_items()[1].string_value());
+			calc::MathExpression b(exprParam.array_items()[2].string_value());
+			dst.composite([=, &r, &g, &b](int x, int y) {
+				r.setVar('x', x); g.setVar('x', x); b.setVar('x', x);
+				r.setVar('y', y); g.setVar('y', y); b.setVar('y', y);
+				r.setVar('w', w); g.setVar('w', w); b.setVar('w', w);
+				r.setVar('h', h); g.setVar('h', h); b.setVar('h', h);
+				return Color(r.eval(), g.eval(), b.eval()) * tint;
+			}, op);
+		}
 	}},
 };
 
