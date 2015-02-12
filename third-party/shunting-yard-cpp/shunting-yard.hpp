@@ -65,6 +65,11 @@ struct MathExpression
 	static std::vector<Function> funcs;
 	static std::vector<Constant> consts;
 
+	static double eval(const std::string& expr, Status* status = 0) {
+		MathExpression e(expr);
+		return e.eval(status);
+	}
+
 private:
 	Token tokens[MAX_TOKENS];
 };
