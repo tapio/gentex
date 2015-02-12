@@ -9,7 +9,7 @@
 #include <chrono>
 #include <cmath>
 
-#include "shunting-yard-next/shunting-yard.hpp"
+#include "shunting-yard-cpp/shunting-yard.hpp"
 using namespace calc;
 
 static int tests = 0;

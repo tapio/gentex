@@ -4,7 +4,7 @@
 #include <iostream>
 #include <algorithm>
 
-#include "shunting-yard-next/shunting-yard.hpp"
+#include "shunting-yard-cpp/shunting-yard.hpp"
 
 namespace gentex {
 
