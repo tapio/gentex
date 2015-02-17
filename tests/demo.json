@@ -31,5 +31,17 @@
 			"stops": [ 0.9 ] },
 		{ "add": "noise", "tint": 0.01 }
 	]
+},{
+	"size": [ 256, 256 ],
+	"out": "star.tga",
+	"ops": [
+		{ "add": "simplex", "freq": 0.02, "tint": 0.1 },
+		{ "mul": "circle", "radius": 100 },
+		{ "add": "noise", "tint": 0.01 },
+		{ "add": "gradientr",
+			"radius": 100,
+			"colors": [ "#b66", "#a44", "#cb6", "#000" ],
+			"stops": [ 0.65, 0.75 ] }
+	]
 }
 ]

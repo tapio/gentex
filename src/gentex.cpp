@@ -208,6 +208,15 @@ std::map<std::string, CommandFunction> s_cmds = {
 			return interp.get(Color(y / h));
 		}, op);
 	}},
+	{ "gradientr", [](Image& dst, CompositeFunction op, const Json& params) {
+		vec2 pos = parseVec2("pos", params, vec2(dst.w * 0.5f, dst.h * 0.5f));
+		float r = parseFloat("radius", params, glm::max(dst.w * 0.5f, dst.h * 0.5f));
+		ColorInterpolator interp(params);
+		dst.composite([=, &interp](int x, int y) {
+			float rpos = glm::clamp(glm::distance(pos, vec2(x, y)) / r, 0.f, 1.f);
+			return interp.get(Color(rpos));
+		}, op);
+	}},
 	{ "sin", [](Image& dst, CompositeFunction op, const Json& params) {
 		vec2 freq = parseVec2("freq", params, vec2(1.f)) * (float)M_PI;
 		vec2 offset = parseVec2("offset", params, vec2(0.f));
@@ -258,7 +267,7 @@ std::map<std::string, CommandFunction> s_cmds = {
 	}},
 	{ "circle", [](Image& dst, CompositeFunction op, const Json& params) {
 		vec2 pos = parseVec2("pos", params, vec2(dst.w * 0.5f, dst.h * 0.5f));
-		float r = params["radius"].number_value();
+		float r = parseFloat("radius", params, glm::max(dst.w * 0.5f, dst.h * 0.5f));
 		Color tint = parseColor("tint", params);
 		dst.composite([pos, r, tint](int x, int y) {
 			float c = glm::distance(pos, vec2(x, y)) <= r ? 1.f : 0.f;

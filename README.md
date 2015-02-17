@@ -89,6 +89,12 @@ Each operation in the `ops` array must have a key that determines how the result
 Almost all generators take an optional `tint` parameter which is a color that is multiplied with the result of the function. Tint is omitted from the list below.
 
 * `const`: plain, constant color
+* `rect`: rectangle
+	* `pos`: position in pixels
+	* `size`: size in pixels
+* `circle`: circle
+	* `pos`: position in pixels
+	* `radius`: radius in pixels
 * `noise`: random non-coherent white noise
 * `simplex`: coherent simplex noise
 * `perlin`: coherent perlin noise
@@ -97,18 +103,13 @@ Almost all generators take an optional `tint` parameter which is a color that is
 	* `colors`: array of at least two colors that form the gradient
 	* `stops`: optional array of numbers from 0 to 1 specifying the fraction of the full length the corresponding color takes
 * `gradienty`: same as `gradientx` but vertical
-* `gradientmap`: similar to `gradientx`, but uses the value of each existing pixel as the position for looking up the gradient color
+* `gradientr`: radial gradient, like `circle` and `gradientx/y` combined
+* `gradientmap`: similar to other gradients, but uses the value of each existing pixel as the position for looking up the gradient color
 * `sinx`: sine wave in the form of sin((x + offset) * freq * pi)
 	* `freq`: frequency value (will be multiplied by pi)
 	* `offset`: offset value
 * `siny`: same as `sinx` but in the y direction
 * `sin`: same as `sinx` followed by `siny`, with ability to set the parameters individually through a 2d array
-* `rect`: rectangle
-	* `pos`: position in pixels
-	* `size`: size in pixels
-* `circle`: circle
-	* `pos`: position in pixels
-	* `radius`: radius in pixels
 * `calc`: arbitrary per-pixel math expression
 	* `expr`: the expression, available variables: x, y, w, h
 * TODO: incomplete list (see tests and source code for more info)
