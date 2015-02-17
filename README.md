@@ -13,7 +13,7 @@ Parts of the project are inspired by mrdoob's [texgen.js](https://github.com/mrd
 * perlin noise
 * simplex noise
 * fractal Brownian motion (fBm)
-* gradient map
+* gradient / gradient mapping
 * sin
 * or / xor
 * pow ("clouds")
@@ -93,6 +93,11 @@ Almost all generators take an optional `tint` parameter which is a color that is
 * `simplex`: coherent simplex noise
 * `perlin`: coherent perlin noise
 * `fbm`: fractal Brownian motion, i.e. multiple octaves of perlin noise
+* `gradientx`: horizontal linear gradient
+	* `colors`: array of at least two colors that form the gradient
+	* `stops`: optional array of numbers from 0 to 1 specifying the fraction of the full length the corresponding color takes
+* `gradienty`: same as `gradientx` but vertical
+* `gradientmap`: similar to `gradientx`, but uses the value of each existing pixel as the position for looking up the gradient color
 * `sinx`: sine wave in the form of sin((x + offset) * freq * pi)
 	* `freq`: frequency value (will be multiplied by pi)
 	* `offset`: offset value

@@ -194,6 +194,20 @@ std::map<std::string, CommandFunction> s_cmds = {
 			return interp.get(color);
 		}, op);
 	}},
+	{ "gradientx", [](Image& dst, CompositeFunction op, const Json& params) {
+		float w = dst.w;
+		ColorInterpolator interp(params);
+		dst.composite([w, &interp](int x, int) {
+			return interp.get(Color(x / w));
+		}, op);
+	}},
+	{ "gradienty", [](Image& dst, CompositeFunction op, const Json& params) {
+		float h = dst.h;
+		ColorInterpolator interp(params);
+		dst.composite([=, &interp](int, int y) {
+			return interp.get(Color(y / h));
+		}, op);
+	}},
 	{ "sin", [](Image& dst, CompositeFunction op, const Json& params) {
 		vec2 freq = parseVec2("freq", params, vec2(1.f)) * (float)M_PI;
 		vec2 offset = parseVec2("offset", params, vec2(0.f));
