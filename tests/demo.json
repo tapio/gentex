@@ -7,7 +7,7 @@
 		{ "sub": "const", "tint": 0.5 },
 		{ "mul": "const", "tint": 2.0 },
 		{ "set": "clamp" },
-		{ "set": "gradient", "colors": [ "#44f", "#fff" ] }
+		{ "set": "gradientmap", "colors": [ "#44f", "#fff" ] }
 	]
 },{
 	"size": [ 256, 256 ],
@@ -18,7 +18,7 @@
 		{ "add": "simplex", "freq": 0.04, "offset": 300, "tint": 0.125 },
 		{ "add": "simplex", "freq": 0.08, "offset": 400, "tint": 0.0625 },
 		{ "add": "simplex", "freq": 0.16, "offset": 500, "tint": 0.03125 },
-		{ "set": "gradient",
+		{ "set": "gradientmap",
 			"colors": [ "#00c", "#22c", "#aa4", "#393", "#666", "#bbb", "#fff" ],
 			"stops": [ 0.32, 0.45, 0.6, 0.8, 0.85 ] }
 	]
