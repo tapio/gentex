@@ -121,7 +121,7 @@ When a parameter is color (such as `tint`), the following formats are supported:
 * Hex string: `"#8800ff"`
 * Abbreviated hex string: `"#80f"`
 * RGB component array: `[0.5, 0.0, "sin(pi/4)"]`
-* Lone number or expression is copied to all elemenets: `0.4` --> `[0.4, 0.4, 0.4]`
+* Lone number or expression is copied to all elements: `0.4` --> `[0.4, 0.4, 0.4]`
 
 **Math expressions**
 
