@@ -4,7 +4,7 @@ Texture Generator
 This is an incomplete command line tool that generates textures based on a JSON spec.
 Parts of the project are inspired by mrdoob's [texgen.js](https://github.com/mrdoob/texgen.js).
 
-![Output samples](sample.jpg "Output samples")
+![Output samples](sample.png "Output samples")
 
 ## Generator Functions:
 
