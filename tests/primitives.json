@@ -11,5 +11,12 @@
 	"ops": [
 		{ "add": "circle", "pos": [128, 128], "radius": 64, "tint": [0.5, 0.1, 0.1] }
 	]
+},{
+	"size": [ 256, 256 ],
+	"out": "pixelate.tga",
+	"ops": [
+		{ "add": "gradientr", "radius": 96, "colors": [ "#f00", "#000" ] },
+		{ "set": "pixelate", "size": 8 }
+	]
 }
 ]

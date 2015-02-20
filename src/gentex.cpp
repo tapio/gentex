@@ -188,6 +188,15 @@ std::map<std::string, CommandFunction> s_cmds = {
 			return saturate(color);
 		}, op);
 	}},
+	{ "pixelate", [](Image& dst, CompositeFunction op, const Json& params) {
+		Image src = dst;
+		vec2 size = parseVec2("size", params, vec2(2, 2));
+		dst.composite([&](int x, int y) {
+			int s = size.x * int(x / size.x);
+			int t = size.y * int(y / size.y);
+			return src.get(s, t);
+		}, op);
+	}},
 	{ "gradientmap", [](Image& dst, CompositeFunction op, const Json& params) {
 		ColorInterpolator interp(params);
 		dst.filter([&](int, int, Color color) {
