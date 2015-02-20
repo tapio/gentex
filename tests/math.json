@@ -36,5 +36,11 @@
 		{ "add": "calc", "expr": "perlin(x*0.01)" },
 		{ "mul": "calc", "expr": "perlin(w+y*0.011)" }
 	]
+},{
+	"size": [ 1024, 1024 ],
+	"out": "mathtest_rnd.tga",
+	"ops": [
+		{ "add": "calc", "expr": ["rnd(1)", "rnd(-500)/-500", "rnd(10)*0.1"] }
+	]
 }
 ]

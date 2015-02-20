@@ -31,7 +31,8 @@ namespace calc {
 	{ "cos", cos },
 	{ "sin", sin },
 	{ "tan", tan },
-	{ "exp", exp }
+	{ "exp", exp },
+	{ "rnd", [](double mult) { return mult * rand() / RAND_MAX; } }
 };
 
 typedef enum {

@@ -129,7 +129,7 @@ Math expressions must always be inside quotes (in order to keep the JSON valid).
 
 Following constants are available: pi, tau, e
 
-Following functions are available: abs, sqrt, ln, lb, lg, cos, sin, tan, exp
+Following functions are available: abs, sqrt, ln, lb, lg, cos, sin, tan, exp, rnd
 
 Following operators are available: ! ^ + - * / % < > ( )
 
