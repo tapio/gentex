@@ -95,6 +95,8 @@ Almost all generators take an optional `tint` parameter which is a color that is
 * `circle`: circle
 	* `pos`: position in pixels
 	* `radius`: radius in pixels
+* `pixelate`: pixelate the image
+	* `size`: how big the new "pixels" are
 * `noise`: random non-coherent white noise
 * `simplex`: coherent simplex noise
 * `perlin`: coherent perlin noise
