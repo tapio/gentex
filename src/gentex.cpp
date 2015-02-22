@@ -183,47 +183,53 @@ std::map<std::string, CommandFunction> s_cmds = {
 			return (1.f - color) * tint;
 		}, op);
 	}},
-	{ "clamp", [](Image& dst, CompositeFunction op, const Json&) {
-		dst.filter([](int, int, Color color) {
-			return saturate(color);
+	{ "clamp", [](Image& dst, CompositeFunction op, const Json& params) {
+		Color tint = parseColor("tint", params);
+		dst.filter([tint](int, int, Color color) {
+			return saturate(color * tint);
 		}, op);
 	}},
 	{ "pixelate", [](Image& dst, CompositeFunction op, const Json& params) {
 		Image src = dst;
 		vec2 size = parseVec2("size", params, vec2(2, 2));
-		dst.composite([&](int x, int y) {
+		Color tint = parseColor("tint", params);
+		dst.composite([=, &src](int x, int y) {
 			int s = size.x * int(x / size.x);
 			int t = size.y * int(y / size.y);
-			return src.get(s, t);
+			return src.get(s, t) * tint;
 		}, op);
 	}},
 	{ "gradientmap", [](Image& dst, CompositeFunction op, const Json& params) {
+		Color tint = parseColor("tint", params);
 		ColorInterpolator interp(params);
 		dst.filter([&](int, int, Color color) {
-			return interp.get(color);
+			return interp.get(color) * tint;
 		}, op);
 	}},
 	{ "gradientx", [](Image& dst, CompositeFunction op, const Json& params) {
 		float w = dst.w;
+		Color tint = parseColor("tint", params);
 		ColorInterpolator interp(params);
-		dst.composite([w, &interp](int x, int) {
-			return interp.get(Color(x / w));
+		dst.composite([=, &interp](int x, int) {
+			return interp.get(Color(x / w)) * tint;
 		}, op);
 	}},
 	{ "gradienty", [](Image& dst, CompositeFunction op, const Json& params) {
 		float h = dst.h;
+		Color tint = parseColor("tint", params);
 		ColorInterpolator interp(params);
 		dst.composite([=, &interp](int, int y) {
-			return interp.get(Color(y / h));
+			return interp.get(Color(y / h)) * tint;
 		}, op);
 	}},
 	{ "gradientr", [](Image& dst, CompositeFunction op, const Json& params) {
 		vec2 pos = parseVec2("pos", params, vec2(dst.w * 0.5f, dst.h * 0.5f));
 		float r = parseFloat("radius", params, glm::max(dst.w * 0.5f, dst.h * 0.5f));
+		Color tint = parseColor("tint", params);
 		ColorInterpolator interp(params);
 		dst.composite([=, &interp](int x, int y) {
 			float rpos = glm::clamp(glm::distance(pos, vec2(x, y)) / r, 0.f, 1.f);
-			return interp.get(Color(rpos));
+			return interp.get(Color(rpos)) * tint;
 		}, op);
 	}},
 	{ "sin", [](Image& dst, CompositeFunction op, const Json& params) {
