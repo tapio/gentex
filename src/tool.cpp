@@ -85,13 +85,17 @@ int main(int argc, char** argv) {
 	bool watch = false;
 	for (int i = 1; i < argc; ++i) {
 		std::string arg = argv[i];
-		if (arg == "-w" || arg == "--watch") {
+		if (arg == "-h" || arg == "--help") {
+			std::cout << "USAGE: " << argv[0] << " [-w | --watch] FILE1 [FILE2...]" << std::endl;
+			return 0;
+		}
+		else if (arg == "-w" || arg == "--watch") {
 			watch = true;
 		}
 		else paths.push_back(arg);
 	}
 	if (paths.empty())
-		panic("specify input file");
+		panic("Specify input file");
 
 	initMathParser();
 
