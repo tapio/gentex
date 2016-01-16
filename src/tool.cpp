@@ -8,7 +8,6 @@
 #include "gentex.hpp"
 
 using namespace gentex;
-using namespace json11;
 
 const std::vector<Op> s_ops = {
 	{ "set", [](Color  , Color b) { return b; } },
