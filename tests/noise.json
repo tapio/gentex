@@ -37,6 +37,14 @@
 	]
 },{
 	"size": [ 256, 256 ],
+	"out": "rgbnoise.tga",
+	"ops": [
+		{ "add": "noise", "tint": [ 1, 0, 0 ] },
+		{ "add": "noise", "tint": [ 0, 1, 0 ] },
+		{ "add": "noise", "tint": [ 0, 0, 1 ] }
+	]
+},{
+	"size": [ 256, 256 ],
 	"out": "test.tga",
 	"ops": [
 		{ "add": "sinx", "freq": 0.08 },
