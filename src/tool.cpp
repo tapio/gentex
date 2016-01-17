@@ -8,6 +8,8 @@
 #include "gentex.hpp"
 
 using namespace gentex;
+using std::chrono::steady_clock;
+using std::chrono::duration_cast;
 
 const std::vector<Op> s_ops = {
 	{ "set", [](Color  , Color b) { return b; } },
@@ -24,8 +26,6 @@ std::string readFile(const std::string& path) {
 	return std::string(std::istreambuf_iterator<char>(f), std::istreambuf_iterator<char>());
 }
 
-inline void msleep(int ms) { std::this_thread::sleep_for(std::chrono::milliseconds(ms)); }
-
 void panic(const char* msg) {
 	std::cout << msg << std::endl;
 	exit(1);
@@ -34,7 +34,7 @@ void panic(const char* msg) {
 bool doTexture(const Json& spec) {
 	const std::string& outfile = spec["out"].string_value();
 	std::cout << "Generating " << outfile << "..." << std::flush;
-	auto t0 = std::chrono::steady_clock::now();
+	auto t0 = steady_clock::now();
 	int w = spec["size"][0].int_value();
 	int h = spec["size"][1].int_value();
 	Image tex(w, h);
@@ -51,12 +51,12 @@ bool doTexture(const Json& spec) {
 		}
 	}
 
-	auto t1 = std::chrono::steady_clock::now();
-	auto dtms = std::chrono::duration_cast<std::chrono::milliseconds>(t1 - t0).count();
+	auto t1 = steady_clock::now();
+	auto dtms = duration_cast<std::chrono::milliseconds>(t1 - t0).count();
 	std::cout << " " << dtms << " ms" << std::flush;
 	tex.writeTGA(outfile);
-	auto t2 = std::chrono::steady_clock::now();
-	dtms = std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count();
+	auto t2 = steady_clock::now();
+	dtms = duration_cast<std::chrono::milliseconds>(t2 - t1).count();
 	std::cout << "   (write: " << dtms << " ms)" << std::endl;
 	return true;
 }
@@ -103,27 +103,27 @@ int main(int argc, char** argv) {
 	for (const auto& path: paths) {
 		std::cout << "Processing " << path << "..." << std::endl;
 		texts.push_back(readFile(path));
-		auto t0 = std::chrono::steady_clock::now();
+		auto t0 = steady_clock::now();
 		if (!doScript(texts.back()))
 			failCount++;
-		auto t1 = std::chrono::steady_clock::now();
-		auto dtms = std::chrono::duration_cast<std::chrono::milliseconds>(t1 - t0).count();
+		auto t1 = steady_clock::now();
+		auto dtms = duration_cast<std::chrono::milliseconds>(t1 - t0).count();
 		std::cout << "File done in " << dtms << " ms" << std::endl;
 	}
 	if (!watch)
 		return failCount;
 
 	while (true) {
-		msleep(500);
+		std::this_thread::sleep_for(std::chrono::milliseconds(500));
 		// TODO: This is very crappy way to detect changes
 		for (unsigned i = 0; i < paths.size(); ++i) {
 			std::string newText = readFile(paths[i]);
 			if (texts[i] != newText) {
 				std::cout << "Reprocessing " << paths[i] << "..." << std::endl;
-				auto t0 = std::chrono::steady_clock::now();
+				auto t0 = steady_clock::now();
 				doScript(newText);
-				auto t1 = std::chrono::steady_clock::now();
-				auto dtms = std::chrono::duration_cast<std::chrono::milliseconds>(t1 - t0).count();
+				auto t1 = steady_clock::now();
+				auto dtms = duration_cast<std::chrono::milliseconds>(t1 - t0).count();
 				std::cout << "File done in " << dtms << " ms" << std::endl;
 				texts[i] = newText;
 			}
