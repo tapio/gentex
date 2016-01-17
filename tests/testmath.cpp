@@ -138,11 +138,11 @@ int main(int, char*[]) {
 	ASSERT_RESULT("2^2^3", 256);
 
 	auto t1 = std::chrono::steady_clock::now();
-	auto dtms = std::chrono::duration_cast<std::chrono::milliseconds>(t1 - t0).count();
+	auto dtus = std::chrono::duration_cast<std::chrono::microseconds>(t1 - t0).count();
 
 	std::cout << (tests - fails) << "/" << tests << " tests succeeded, " << fails << " failed";
 	std::cout << std::endl;
-	std::cout << "tests took " << dtms << " ms" << std::endl;
+	std::cout << "tests took " << dtus << " µs" << std::endl;
 
 	return fails;
 }
