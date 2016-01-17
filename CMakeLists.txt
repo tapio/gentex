@@ -27,7 +27,10 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
 endif()
 
 if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-	set(CMAKE_CXX_FLAGS "-std=c++11 -Wall -Wextra -march=native -ffast-math ${CMAKE_CXX_FLAGS}")
+	set(CMAKE_CXX_FLAGS "-std=c++11 -Wall -Wextra -march=native ${CMAKE_CXX_FLAGS}")
+	if (NOT DEFINED ENV{TRAVIS})
+		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -ffast-math")
+	endif()
 endif()
 
 # Libs
