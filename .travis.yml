@@ -1,0 +1,20 @@
+sudo: false
+language: cpp
+compiler:
+  - gcc
+  - clang
+addons:
+  apt:
+    sources:
+    - ubuntu-toolchain-r-test
+    packages:
+    - g++-4.8
+    - cmake
+script:
+  - if [ "$CXX" = "g++" ]; then export CXX="g++-4.8" CC="gcc-4.8"; fi
+  - cmake . -Bbuild
+  - cmake --build build
+  - cd build
+  - ./testmath
+  - ./gentex ../tests/*.json
+

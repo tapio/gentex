@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/tapio/gentex.svg?branch=master)](https://travis-ci.org/tapio/gentex)
+
 Texture Generator
 =================
 
