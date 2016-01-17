@@ -67,7 +67,7 @@ inline Color parseColor(const char* name, const Json& params, Color def = Color(
 struct ColorInterpolator {
 	struct GradientPoint { float pos; Color color; };
 
-	ColorInterpolator(const Json& params) {
+	explicit ColorInterpolator(const Json& params) {
 		// TODO: More error checking
 		if (params["colors"].is_array()) {
 			const auto& colors = params["colors"].array_items();
