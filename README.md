@@ -1,6 +1,4 @@
-[![Build Status](https://travis-ci.org/tapio/gentex.svg?branch=master)](https://travis-ci.org/tapio/gentex)
-
-Texture Generator
+Texture Generator [![Build Status](https://travis-ci.org/tapio/gentex.svg?branch=master)](https://travis-ci.org/tapio/gentex)
 =================
 
 This is an incomplete command line tool that generates textures based on a JSON spec.
