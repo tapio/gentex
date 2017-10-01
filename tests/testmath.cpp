@@ -39,6 +39,7 @@ int main(int, char*[]) {
 	ASSERT_RESULT("3 + (5 + 1 + (2 + 2))", 13);
 	ASSERT_RESULT("1+2+4+8+16 + 11", 42);
 	ASSERT_RESULT("2.1+2.1", 4.2);
+	ASSERT_RESULT("-2+2.1", 0.1);
 
 	// Test subtraction
 	ASSERT_RESULT("8-4", 4);
@@ -95,6 +96,12 @@ int main(int, char*[]) {
 	ASSERT_RESULT("2.5 > 1.6", 1);
 	ASSERT_RESULT("2 * 1 < 1.5", 0);
 	ASSERT_RESULT("2 * (1 < 1.5)", 2);
+	ASSERT_RESULT("-1 < 0", 1);
+	ASSERT_RESULT("0 > -1", 1);
+	ASSERT_RESULT("-1 < -2", 0);
+	ASSERT_RESULT("-2 < -1", 1);
+	ASSERT_RESULT("1 > -1", 1);
+	ASSERT_RESULT("1 < -1", 0);
 
 	// Test functions
 	ASSERT_RESULT("abs(-32)", 32);
