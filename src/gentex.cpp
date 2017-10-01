@@ -6,6 +6,9 @@
 
 #include "shunting-yard-cpp/shunting-yard.hpp"
 
+#define STB_IMAGE_WRITE_IMPLEMENTATION
+#include "stb/stb_image_write.h"
+
 namespace gentex {
 
 inline float rnd() { return rand() / (float)RAND_MAX; }
@@ -327,37 +330,87 @@ void initMathParser() {
 
 // Image class
 
-void Image::writeTGA(const std::string& filepath) const {
-	std::ofstream tgaout(filepath.c_str(), std::ios::binary);
-	char tga_header_part1[] = {
+const std::vector<char> Image::getBytes() const {
+	std::vector<char> bytes;
+	bytes.resize(w * h * channels);
+	int i = 0;
+	for (int y = 0; y < h; ++y) {
+		for (int x = 0; x < w; ++x) {
+			const Color pix = saturate(get(x, y));
+			bytes[i++] = static_cast<unsigned char>(pix.r * 255);
+			bytes[i++] = static_cast<unsigned char>(pix.g * 255);
+			bytes[i++] = static_cast<unsigned char>(pix.b * 255);
+		}
+	}
+	return bytes;
+}
+
+void Image::writeTGA(const std::string& filepath, bool rleCompress) const {
+	if (rleCompress)
+	{
+		int backup = stbi_write_tga_with_rle;
+		stbi_write_tga_with_rle = rleCompress;
+		auto bytes = getBytes();
+		stbi_write_tga(filepath.c_str(), w, h, channels, &bytes[0]);
+		stbi_write_tga_with_rle = backup;
+	}
+	else
+	{
+		// Fast path
+		std::ofstream tgaout(filepath.c_str(), std::ios::binary);
+		char tga_header_part1[] = {
 		0x00,  // No id field
 		0x00,  // No palette
 		0x02,  // 2 = Uncompressed true-color
 		0x00, 0x00, 0x00, 0x00, 0x00,  // Palette stuff (not used)
 		0x00, 0x00,  // X-origin
 		0x00, 0x00  // Y-origin
-	};
-	tgaout.write(tga_header_part1, sizeof(tga_header_part1));
-	// 16-bit width and height (little-endian)
-	tgaout << static_cast<char>(w & 0xff);
-	tgaout << static_cast<char>((w >> 8) & 0xff);
-	tgaout << static_cast<char>(h & 0xff);
-	tgaout << static_cast<char>((h >> 8) & 0xff);
-	tgaout << static_cast<char>(24); // Bits per pixel
-	tgaout << static_cast<char>(0x00);  // No special flags
-	std::vector<char> pixbuf;
-	pixbuf.resize(w * h * 3);
-	// Image data
-	int i = 0;
-	for (int y = h-1; y >= 0; --y) {
-		for (int x = 0; x < w; ++x) {
-			const Color pix = saturate(get(x, y));
-			pixbuf[i++] = static_cast<unsigned char>(pix.b * 255);
-			pixbuf[i++] = static_cast<unsigned char>(pix.g * 255);
-			pixbuf[i++] = static_cast<unsigned char>(pix.r * 255);
+		};
+		tgaout.write(tga_header_part1, sizeof(tga_header_part1));
+		// 16-bit width and height (little-endian)
+		tgaout << static_cast<char>(w & 0xff);
+		tgaout << static_cast<char>((w >> 8) & 0xff);
+		tgaout << static_cast<char>(h & 0xff);
+		tgaout << static_cast<char>((h >> 8) & 0xff);
+		tgaout << static_cast<char>(24); // Bits per pixel
+		tgaout << static_cast<char>(0x00);  // No special flags
+		std::vector<char> pixbuf;
+		pixbuf.resize(w * h * channels);
+		// Image data
+		int i = 0;
+		for (int y = h-1; y >= 0; --y) {
+			for (int x = 0; x < w; ++x) {
+				const Color pix = saturate(get(x, y));
+				pixbuf[i++] = static_cast<unsigned char>(pix.b * 255);
+				pixbuf[i++] = static_cast<unsigned char>(pix.g * 255);
+				pixbuf[i++] = static_cast<unsigned char>(pix.r * 255);
+			}
 		}
+		tgaout.write(&pixbuf[0], pixbuf.size());
 	}
-	tgaout.write(&pixbuf[0], pixbuf.size());
+}
+
+void Image::writePNG(const std::string& filepath) const {
+	auto bytes = getBytes();
+	stbi_write_png(filepath.c_str(), w, h, channels, &bytes[0], 0);
+}
+
+void Image::writeJPG(const std::string& filepath, int quality) const {
+	auto bytes = getBytes();
+	stbi_write_jpg(filepath.c_str(), w, h, channels, &bytes[0], quality);
+}
+
+void Image::write(const std::string& filepath) const {
+	if (filepath.find(".png") != std::string::npos) {
+		writePNG(filepath);
+	} else if (filepath.find(".jpg") != std::string::npos) {
+		writeJPG(filepath);
+	} else if (filepath.find(".tga") != std::string::npos) {
+		writeTGA(filepath);
+	} else {
+		// TODO: Warning message?
+		writePNG(filepath);
+	}
 }
 
 } // namespace

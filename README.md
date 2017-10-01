@@ -68,6 +68,10 @@ Each individual texture spec contains the following keys:
 
 * `size`: 2d array specifying the dimensions of the generated image, e.g. `"size": [ 256, 256 ]`
 * `out`: output filename, e.g. `"out": "test.tga"`
+	- format is determined from file extension, supported:
+		- `.png` (recommened, losslessly compressed)
+		- `.tga` (fastest to write, defaults to uncompressed, large file size)
+		- `.jpg` (lossy compression, smallest file size on complex images)
 * `ops`: array of operations (each is a JSON object) that produce the desired image when applied sequentially (see below)
 
 ### Operations

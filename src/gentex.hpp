@@ -105,9 +105,14 @@ namespace gentex {
 			}
 		}
 
-		void writeTGA(const std::string& filepath = "out.tga") const;
+		void write(const std::string& filepath = "out.png") const;
+		void writeTGA(const std::string& filepath = "out.tga", bool rleCompress = false) const;
+		void writePNG(const std::string& filepath = "out.png") const;
+		void writeJPG(const std::string& filepath = "out.jpg", int quality = 95) const;
+		const std::vector<char> getBytes() const;
 
 		int w, h;
+		const int channels = 3;
 		std::vector<Color> buffer;
 	};
 

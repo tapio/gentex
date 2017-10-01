@@ -54,7 +54,7 @@ bool doTexture(const Json& spec) {
 	auto t1 = steady_clock::now();
 	auto dtms = duration_cast<std::chrono::milliseconds>(t1 - t0).count();
 	std::cout << " " << dtms << " ms" << std::flush;
-	tex.writeTGA(outfile);
+	tex.write(outfile);
 	auto t2 = steady_clock::now();
 	dtms = duration_cast<std::chrono::milliseconds>(t2 - t1).count();
 	std::cout << "   (write: " << dtms << " ms)" << std::endl;

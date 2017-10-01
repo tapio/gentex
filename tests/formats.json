@@ -1,0 +1,63 @@
+[
+{
+	"size": [ 512, 512 ],
+	"out": "terrain.tga",
+	"ops": [
+		{ "add": "simplex", "freq": 0.01, "offset": 100, "tint": 0.5 },
+		{ "add": "simplex", "freq": 0.02, "offset": 200, "tint": 0.25 },
+		{ "add": "simplex", "freq": 0.04, "offset": 300, "tint": 0.125 },
+		{ "add": "simplex", "freq": 0.08, "offset": 400, "tint": 0.0625 },
+		{ "add": "simplex", "freq": 0.16, "offset": 500, "tint": 0.03125 },
+		{ "set": "gradientmap",
+			"colors": [ "#00c", "#22c", "#aa4", "#393", "#666", "#bbb", "#fff" ],
+			"stops": [ 0.32, 0.45, 0.6, 0.8, 0.85 ] }
+	]
+},{
+	"size": [ 512, 512 ],
+	"out": "terrain.png",
+	"ops": [
+		{ "add": "simplex", "freq": 0.01, "offset": 100, "tint": 0.5 },
+		{ "add": "simplex", "freq": 0.02, "offset": 200, "tint": 0.25 },
+		{ "add": "simplex", "freq": 0.04, "offset": 300, "tint": 0.125 },
+		{ "add": "simplex", "freq": 0.08, "offset": 400, "tint": 0.0625 },
+		{ "add": "simplex", "freq": 0.16, "offset": 500, "tint": 0.03125 },
+		{ "set": "gradientmap",
+			"colors": [ "#00c", "#22c", "#aa4", "#393", "#666", "#bbb", "#fff" ],
+			"stops": [ 0.32, 0.45, 0.6, 0.8, 0.85 ] }
+	]
+},{
+	"size": [ 512, 512 ],
+	"out": "terrain.jpg",
+	"ops": [
+		{ "add": "simplex", "freq": 0.01, "offset": 100, "tint": 0.5 },
+		{ "add": "simplex", "freq": 0.02, "offset": 200, "tint": 0.25 },
+		{ "add": "simplex", "freq": 0.04, "offset": 300, "tint": 0.125 },
+		{ "add": "simplex", "freq": 0.08, "offset": 400, "tint": 0.0625 },
+		{ "add": "simplex", "freq": 0.16, "offset": 500, "tint": 0.03125 },
+		{ "set": "gradientmap",
+			"colors": [ "#00c", "#22c", "#aa4", "#393", "#666", "#bbb", "#fff" ],
+			"stops": [ 0.32, 0.45, 0.6, 0.8, 0.85 ] }
+	]
+},{
+	"size": [ 64, 64 ],
+	"out": "formattest.tga",
+	"ops": [
+		{ "add": "rect", "pos": [8, 8], "size": [32, 8], "tint": "#f00" },
+		{ "add": "rect", "pos": [32, 16], "size": [32, 8], "tint": "#00f" }
+	]
+},{
+	"size": [ 64, 64 ],
+	"out": "formattest.png",
+	"ops": [
+		{ "add": "rect", "pos": [8, 8], "size": [32, 8], "tint": "#f00" },
+		{ "add": "rect", "pos": [32, 16], "size": [32, 8], "tint": "#00f" }
+	]
+},{
+	"size": [ 64, 64 ],
+	"out": "formattest.jpg",
+	"ops": [
+		{ "add": "rect", "pos": [8, 8], "size": [32, 8], "tint": "#f00" },
+		{ "add": "rect", "pos": [32, 16], "size": [32, 8], "tint": "#00f" }
+	]
+}
+]
