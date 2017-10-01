@@ -348,12 +348,31 @@ std::map<std::string, CommandFunction> s_cmds = {
 	}},
 };
 
-CommandFunction& getCommand(const std::string& name) {
-	return s_cmds[name];
+void InitMathParser() {
+	calc::MathExpression::funcs.push_back({"perlin", [](double x)->double{ return perlin(vec2(x, 0.f)) * 0.5f + 0.5f; }});
 }
 
-void initMathParser() {
-	calc::MathExpression::funcs.push_back({"perlin", [](double x)->double{ return perlin(vec2(x, 0.f)) * 0.5f + 0.5f; }});
+// Generator class
+
+static const std::vector<Op> s_ops = {
+	{ "set", [](Color  , Color b) { return b; } },
+	{ "add", [](Color a, Color b) { return a + b; } },
+	{ "sub", [](Color a, Color b) { return a - b; } },
+	{ "mul", [](Color a, Color b) { return a * b; } },
+	{ "div", [](Color a, Color b) { return a / b; } },
+	{ "min", [](Color a, Color b) { return min(a, b); } },
+	{ "max", [](Color a, Color b) { return max(a, b); } },
+};
+
+void Generator::processCommand(const Json &cmd) {
+	for (const auto& op : s_ops) {
+		if (!cmd[op.name].is_null()) {
+			const std::string& genFunc = cmd[op.name].string_value();
+			//std::cout << "Applying " << gen << " with " << op.name << std::endl;
+			s_cmds[genFunc](image, op.op, cmd);
+			break;
+		}
+	}
 }
 
 // Image class

@@ -11,16 +11,6 @@ using namespace gentex;
 using std::chrono::steady_clock;
 using std::chrono::duration_cast;
 
-const std::vector<Op> s_ops = {
-	{ "set", [](Color  , Color b) { return b; } },
-	{ "add", [](Color a, Color b) { return a + b; } },
-	{ "sub", [](Color a, Color b) { return a - b; } },
-	{ "mul", [](Color a, Color b) { return a * b; } },
-	{ "div", [](Color a, Color b) { return a / b; } },
-	{ "min", [](Color a, Color b) { return min(a, b); } },
-	{ "max", [](Color a, Color b) { return max(a, b); } },
-};
-
 std::string readFile(const std::string& path) {
 	std::ifstream f(path);
 	return std::string(std::istreambuf_iterator<char>(f), std::istreambuf_iterator<char>());
@@ -37,24 +27,17 @@ bool doTexture(const Json& spec) {
 	auto t0 = steady_clock::now();
 	int w = spec["size"][0].int_value();
 	int h = spec["size"][1].int_value();
-	Image tex(w, h);
+	Generator gen(w, h);
 
 	const auto& cmds = spec["ops"].array_items();
 	for (const auto& cmd : cmds) {
-		for (const auto& op : s_ops) {
-			if (!cmd[op.name].is_null()) {
-				const std::string& gen = cmd[op.name].string_value();
-				//std::cout << "Applying " << gen << " with " << op.name << std::endl;
-				getCommand(gen)(tex, op.op, cmd);
-				break;
-			}
-		}
+		gen.processCommand(cmd);
 	}
 
 	auto t1 = steady_clock::now();
 	auto dtms = duration_cast<std::chrono::milliseconds>(t1 - t0).count();
 	std::cout << " " << dtms << " ms" << std::flush;
-	tex.write(outfile);
+	gen.image.write(outfile);
 	auto t2 = steady_clock::now();
 	dtms = duration_cast<std::chrono::milliseconds>(t2 - t1).count();
 	std::cout << "   (write: " << dtms << " ms)" << std::endl;
@@ -96,7 +79,7 @@ int main(int argc, char** argv) {
 	if (paths.empty())
 		panic("Specify input file");
 
-	initMathParser();
+	InitMathParser();
 
 	int failCount = 0;
 	std::vector<std::string> texts;

@@ -40,12 +40,9 @@ namespace gentex {
 		CompositeFunction op;
 	};
 
-	void initMathParser();
+	void InitMathParser();
 
 	inline Color saturate(const Color c) { return clamp(c, 0.0f, 1.0f); }
-
-	CommandFunction& getCommand(const std::string& name);
-
 
 	class Image {
 	public:
@@ -114,6 +111,15 @@ namespace gentex {
 		int w, h;
 		static const int channels = 3; // TODO: Support different channel count, i.e. alpha?
 		std::vector<Color> buffer;
+	};
+
+	class Generator {
+	public:
+		Generator(int width, int height): image(width, height) { }
+
+		void processCommand(const Json& cmd);
+
+		Image image;
 	};
 
 } // namespace
