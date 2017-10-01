@@ -112,7 +112,7 @@ namespace gentex {
 		const std::vector<char> getBytes() const;
 
 		int w, h;
-		const int channels = 3;
+		static const int channels = 3; // TODO: Support different channel count, i.e. alpha?
 		std::vector<Color> buffer;
 	};
 

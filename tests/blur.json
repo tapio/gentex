@@ -1,0 +1,27 @@
+[
+{
+	"size": [ 256, 256 ],
+	"out": "boxblurx5.png",
+	"ops": [
+		{ "add": "gradientr", "radius": 96, "colors": [ "#f00", "#000" ] },
+		{ "set": "pixelate", "size": 4 },
+		{ "set": "boxblur", "radius": [5, 0] }
+	]
+},{
+	"size": [ 256, 256 ],
+	"out": "boxblury5.png",
+	"ops": [
+		{ "add": "gradientr", "radius": 96, "colors": [ "#f00", "#000" ] },
+		{ "set": "pixelate", "size": 4 },
+		{ "set": "boxblur", "radius": [0, 5] }
+	]
+},{
+	"size": [ 256, 256 ],
+	"out": "boxblur5.png",
+	"ops": [
+		{ "add": "gradientr", "radius": 96, "colors": [ "#f00", "#000" ] },
+		{ "set": "pixelate", "size": 4 },
+		{ "set": "boxblur", "radius": 5 }
+	]
+}
+]

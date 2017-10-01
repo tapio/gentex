@@ -235,6 +235,34 @@ std::map<std::string, CommandFunction> s_cmds = {
 			return interp.get(Color(rpos)) * tint;
 		}, op);
 	}},
+	{ "boxblur", [](Image& dst, CompositeFunction op, const Json& params) {
+		Image src = dst;
+		vec2 radius = parseVec2("radius", params, vec2(1, 1));
+		vec2 mult = vec2(1, 1) / (radius + radius + vec2(1, 1));
+		Color tint = parseColor("tint", params);
+		if (radius.x > 0) {
+			dst.composite([=, &src](int x, int y) {
+				Color accum;
+				int start = x - radius.x;
+				int end = x + radius.x;
+				for (int i = start; i <= end; ++i)
+					accum += src.getClamp(i, y);
+				return accum * mult.x * tint;
+			}, op);
+			if (radius.y > 0)
+				src = dst;
+		}
+		if (radius.y > 0) {
+			dst.composite([=, &src](int x, int y) {
+				Color accum;
+				int start = y - radius.y;
+				int end = y + radius.y;
+				for (int i = start; i <= end; ++i)
+					accum += src.getClamp(x, i);
+				return accum * mult.y * tint;
+			}, op);
+		}
+	}},
 	{ "sin", [](Image& dst, CompositeFunction op, const Json& params) {
 		vec2 freq = parseVec2("freq", params, vec2(1.f)) * (float)M_PI;
 		vec2 offset = parseVec2("offset", params, vec2(0.f));

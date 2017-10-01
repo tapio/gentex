@@ -101,6 +101,8 @@ Almost all generators take an optional `tint` parameter which is a color that is
 	* `radius`: radius in pixels
 * `pixelate`: pixelate the image
 	* `size`: how big the new "pixels" are
+* `boxblur`: blur using a box filter
+	* `radius`: radius(es) of the box kernel to use (can specify separately for x/y axes)
 * `noise`: random non-coherent white noise
 * `simplex`: coherent simplex noise
 * `perlin`: coherent perlin noise
