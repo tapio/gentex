@@ -1,0 +1,41 @@
+[
+{
+	"size": [ 256, 256 ],
+	"out": "blend25.tga",
+	"ops": [
+		{ "set": "gradienty",
+			"colors": [ "#33b", "#8ff", "#3b3" ],
+			"stops": [ 0.9 ] },
+		{ "add": "noise", "tint": 0.01 },
+		{ "save": "sky" },
+		{ "set": "const", "tint": 0 },
+		{ "add": "simplex", "freq": 0.02, "tint": 0.1 },
+		{ "mul": "circle", "radius": 100 },
+		{ "add": "noise", "tint": 0.01 },
+		{ "add": "gradientr",
+			"radius": 100,
+			"colors": [ "#b66", "#a44", "#cb6", "#000" ],
+			"stops": [ 0.65, 0.75 ] },
+		{ "set": "blend", "other": "sky", "alpha": 0.25 }
+	]
+},{
+	"size": [ 256, 256 ],
+	"out": "blend75.tga",
+	"ops": [
+		{ "set": "gradienty",
+			"colors": [ "#33b", "#8ff", "#3b3" ],
+			"stops": [ 0.9 ] },
+		{ "add": "noise", "tint": 0.01 },
+		{ "save": "sky" },
+		{ "set": "const", "tint": 0 },
+		{ "add": "simplex", "freq": 0.02, "tint": 0.1 },
+		{ "mul": "circle", "radius": 100 },
+		{ "add": "noise", "tint": 0.01 },
+		{ "add": "gradientr",
+			"radius": 100,
+			"colors": [ "#b66", "#a44", "#cb6", "#000" ],
+			"stops": [ 0.65, 0.75 ] },
+		{ "set": "blend", "other": "sky", "alpha": 0.75 }
+	]
+}
+]

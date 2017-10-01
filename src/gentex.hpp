@@ -1,6 +1,7 @@
 #pragma once
 #include <string>
 #include <vector>
+#include <map>
 #include <functional>
 
 #define GLM_FORCE_CXX11
@@ -12,6 +13,7 @@
 namespace gentex {
 
 	class Image;
+	class Generator;
 
 	typedef unsigned int uint;
 	typedef glm::vec3 Color;
@@ -28,7 +30,7 @@ namespace gentex {
 	typedef std::function<Color(int, int, Color)> FilterFunction;
 	typedef std::function<Color(int, int)> GeneratorFunction;
 
-	typedef std::function<void(Image&, CompositeFunction, const Json&)> CommandFunction;
+	typedef std::function<void(Image&, CompositeFunction, const Json&, Generator&)> CommandFunction;
 
 	struct Command {
 		std::string name;
@@ -47,6 +49,7 @@ namespace gentex {
 	class Image {
 	public:
 		Image(int w, int h): w(w), h(h), buffer(w * h) { }
+		Image() {}
 
 		Color sample(float u, float v) const {
 			return get(u / w, v / h);
@@ -108,7 +111,7 @@ namespace gentex {
 		void writeJPG(const std::string& filepath = "out.jpg", int quality = 95) const;
 		const std::vector<char> getBytes() const;
 
-		int w, h;
+		int w = 0, h = 0;
 		static const int channels = 3; // TODO: Support different channel count, i.e. alpha?
 		std::vector<Color> buffer;
 	};
@@ -120,6 +123,7 @@ namespace gentex {
 		void processCommand(const Json& cmd);
 
 		Image image;
+		std::map<std::string, Image> namedImages;
 	};
 
 } // namespace

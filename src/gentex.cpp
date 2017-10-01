@@ -13,6 +13,13 @@ namespace gentex {
 
 inline float rnd() { return rand() / (float)RAND_MAX; }
 
+inline const std::string& parseString(const char* name, const Json& params, const std::string& def = "") {
+	const Json& param = params[name];
+	if (param.is_string())
+		return param.string_value();
+	return def;
+}
+
 inline float parseFloat(const Json& param, float def = 0.f) {
 	if (param.is_number())
 		return param.number_value();
@@ -109,19 +116,31 @@ struct ColorInterpolator {
 
 
 std::map<std::string, CommandFunction> s_cmds = {
-	{ "const", [](Image& dst, CompositeFunction op, const Json& params) {
+	{ "const", [](Image& dst, CompositeFunction op, const Json& params, Generator&) {
 		Color tint = parseColor("tint", params);
 		dst.composite([tint](int, int) {
 			return tint;
 		}, op);
 	}},
-	{ "noise", [](Image& dst, CompositeFunction op, const Json& params) {
+	{ "blend", [](Image& dst, CompositeFunction op, const Json& params, Generator& gen) {
+		Color tint = parseColor("tint", params);
+		const std::string& name = parseString("other", params);
+		const auto& other = gen.namedImages.find(name);
+		Image target = other != gen.namedImages.end() ? other->second : dst;
+		float alpha = parseFloat("alpha", params, 0.5f);
+		dst.composite([tint, alpha, &dst, &target](int x, int y) {
+			auto a = dst.get(x, y);
+			auto b = target.get(x, y);
+			return mix(a, b, alpha) * tint;
+		}, op);
+	}},
+	{ "noise", [](Image& dst, CompositeFunction op, const Json& params, Generator&) {
 		Color tint = parseColor("tint", params);
 		dst.composite([tint](int, int) {
 			return Color(rnd()) * tint;
 		}, op);
 	}},
-	{ "simplex", [](Image& dst, CompositeFunction op, const Json& params) {
+	{ "simplex", [](Image& dst, CompositeFunction op, const Json& params, Generator&) {
 		vec2 freq = parseVec2("freq", params, vec2(1.f));
 		vec2 offset = parseVec2("offset", params, vec2(0.f));
 		Color tint = parseColor("tint", params);
@@ -129,7 +148,7 @@ std::map<std::string, CommandFunction> s_cmds = {
 			return Color(simplex((vec2(x, y) + offset) * freq) * 0.5f + 0.5f) * tint;
 		}, op);
 	}},
-	{ "perlin", [](Image& dst, CompositeFunction op, const Json& params) {
+	{ "perlin", [](Image& dst, CompositeFunction op, const Json& params, Generator&) {
 		vec2 freq = parseVec2("freq", params, vec2(1.f));
 		vec2 offset = parseVec2("offset", params, vec2(0.f));
 		vec2 period = vec2(dst.w, dst.h) * freq;
@@ -138,7 +157,7 @@ std::map<std::string, CommandFunction> s_cmds = {
 			return Color(perlin((vec2(x, y) + offset) * freq, period) * 0.5f + 0.5f) * tint;
 		}, op);
 	}},
-	{ "fbm", [](Image& dst, CompositeFunction op, const Json& params) {
+	{ "fbm", [](Image& dst, CompositeFunction op, const Json& params, Generator&) {
 		vec2 freq = parseVec2("freq", params, vec2(1.f));
 		vec2 offset = parseVec2("offset", params, vec2(0.f));
 		float octaves = parseFloat("octaves", params, 1.f);
@@ -158,7 +177,7 @@ std::map<std::string, CommandFunction> s_cmds = {
 			return Color(c * 0.5f + 0.5f) * tint;
 		}, op);
 	}},
-	{ "turbulence", [](Image& dst, CompositeFunction op, const Json& params) {
+	{ "turbulence", [](Image& dst, CompositeFunction op, const Json& params, Generator&) {
 		float s = parseFloat("size", params, 1.f) * min(dst.w, dst.h);
 		Color tint = parseColor("tint", params);
 		dst.composite([=](int x, int y) {
@@ -171,7 +190,7 @@ std::map<std::string, CommandFunction> s_cmds = {
 			return Color(value / s * 0.5f + 0.5f) * tint;
 		}, op);
 	}},
-	{ "pow", [](Image& dst, CompositeFunction op, const Json& params) {
+	{ "pow", [](Image& dst, CompositeFunction op, const Json& params, Generator&) {
 		float density = 1.f - params["density"].number_value();
 		float sharpness = params["sharpness"].number_value();
 		Color tint = parseColor("tint", params);
@@ -180,19 +199,19 @@ std::map<std::string, CommandFunction> s_cmds = {
 			return (1.f - glm::pow(Color(sharpness), c)) * tint;
 		}, op);
 	}},
-	{ "inv", [](Image& dst, CompositeFunction op, const Json& params) {
+	{ "inv", [](Image& dst, CompositeFunction op, const Json& params, Generator&) {
 		Color tint = parseColor("tint", params);
 		dst.filter([tint](int, int, Color color) {
 			return (1.f - color) * tint;
 		}, op);
 	}},
-	{ "clamp", [](Image& dst, CompositeFunction op, const Json& params) {
+	{ "clamp", [](Image& dst, CompositeFunction op, const Json& params, Generator&) {
 		Color tint = parseColor("tint", params);
 		dst.filter([tint](int, int, Color color) {
 			return saturate(color * tint);
 		}, op);
 	}},
-	{ "pixelate", [](Image& dst, CompositeFunction op, const Json& params) {
+	{ "pixelate", [](Image& dst, CompositeFunction op, const Json& params, Generator&) {
 		Image src = dst;
 		vec2 size = parseVec2("size", params, vec2(2, 2));
 		Color tint = parseColor("tint", params);
@@ -202,14 +221,14 @@ std::map<std::string, CommandFunction> s_cmds = {
 			return src.get(s, t) * tint;
 		}, op);
 	}},
-	{ "gradientmap", [](Image& dst, CompositeFunction op, const Json& params) {
+	{ "gradientmap", [](Image& dst, CompositeFunction op, const Json& params, Generator&) {
 		Color tint = parseColor("tint", params);
 		ColorInterpolator interp(params);
 		dst.filter([&](int, int, Color color) {
 			return interp.get(color) * tint;
 		}, op);
 	}},
-	{ "gradientx", [](Image& dst, CompositeFunction op, const Json& params) {
+	{ "gradientx", [](Image& dst, CompositeFunction op, const Json& params, Generator&) {
 		float w = dst.w;
 		Color tint = parseColor("tint", params);
 		ColorInterpolator interp(params);
@@ -217,7 +236,7 @@ std::map<std::string, CommandFunction> s_cmds = {
 			return interp.get(Color(x / w)) * tint;
 		}, op);
 	}},
-	{ "gradienty", [](Image& dst, CompositeFunction op, const Json& params) {
+	{ "gradienty", [](Image& dst, CompositeFunction op, const Json& params, Generator&) {
 		float h = dst.h;
 		Color tint = parseColor("tint", params);
 		ColorInterpolator interp(params);
@@ -225,7 +244,7 @@ std::map<std::string, CommandFunction> s_cmds = {
 			return interp.get(Color(y / h)) * tint;
 		}, op);
 	}},
-	{ "gradientr", [](Image& dst, CompositeFunction op, const Json& params) {
+	{ "gradientr", [](Image& dst, CompositeFunction op, const Json& params, Generator&) {
 		vec2 pos = parseVec2("pos", params, vec2(dst.w * 0.5f, dst.h * 0.5f));
 		float r = parseFloat("radius", params, glm::max(dst.w * 0.5f, dst.h * 0.5f));
 		Color tint = parseColor("tint", params);
@@ -235,7 +254,7 @@ std::map<std::string, CommandFunction> s_cmds = {
 			return interp.get(Color(rpos)) * tint;
 		}, op);
 	}},
-	{ "boxblur", [](Image& dst, CompositeFunction op, const Json& params) {
+	{ "boxblur", [](Image& dst, CompositeFunction op, const Json& params, Generator&) {
 		Image src = dst;
 		vec2 radius = parseVec2("radius", params, vec2(1, 1));
 		vec2 mult = vec2(1, 1) / (radius + radius + vec2(1, 1));
@@ -263,7 +282,7 @@ std::map<std::string, CommandFunction> s_cmds = {
 			}, op);
 		}
 	}},
-	{ "sin", [](Image& dst, CompositeFunction op, const Json& params) {
+	{ "sin", [](Image& dst, CompositeFunction op, const Json& params, Generator&) {
 		vec2 freq = parseVec2("freq", params, vec2(1.f)) * (float)M_PI;
 		vec2 offset = parseVec2("offset", params, vec2(0.f));
 		Color tint = parseColor("tint", params);
@@ -272,7 +291,7 @@ std::map<std::string, CommandFunction> s_cmds = {
 			return op(s.x * tint, s.y * tint);
 		}, op);
 	}},
-	{ "sinx", [](Image& dst, CompositeFunction op, const Json& params) {
+	{ "sinx", [](Image& dst, CompositeFunction op, const Json& params, Generator&) {
 		float freq = params["freq"].number_value() * M_PI;
 		float offset = params["offset"].number_value();
 		Color tint = parseColor("tint", params);
@@ -280,7 +299,7 @@ std::map<std::string, CommandFunction> s_cmds = {
 			return std::sin((x + offset) * freq) * tint;
 		}, op);
 	}},
-	{ "siny", [](Image& dst, CompositeFunction op, const Json& params) {
+	{ "siny", [](Image& dst, CompositeFunction op, const Json& params, Generator&) {
 		float freq = params["freq"].number_value() * M_PI;
 		float offset = params["offset"].number_value();
 		Color tint = parseColor("tint", params);
@@ -288,21 +307,21 @@ std::map<std::string, CommandFunction> s_cmds = {
 			return std::sin((y + offset) * freq) * tint;
 		}, op);
 	}},
-	{ "or", [](Image& dst, CompositeFunction op, const Json& params) {
+	{ "or", [](Image& dst, CompositeFunction op, const Json& params, Generator&) {
 		float w = dst.w;
 		Color tint = parseColor("tint", params);
 		dst.composite([w, tint](int x, int y) {
 			return ((x | y) / w) * tint;
 		}, op);
 	}},
-	{ "xor", [](Image& dst, CompositeFunction op, const Json& params) {
+	{ "xor", [](Image& dst, CompositeFunction op, const Json& params, Generator&) {
 		float w = dst.w;
 		Color tint = parseColor("tint", params);
 		dst.composite([w, tint](int x, int y) {
 			return ((x ^ y) / w) * tint;
 		}, op);
 	}},
-	{ "rect", [](Image& dst, CompositeFunction op, const Json& params) {
+	{ "rect", [](Image& dst, CompositeFunction op, const Json& params, Generator&) {
 		vec2 pos = parseVec2("pos", params);
 		vec2 size = parseVec2("size", params);
 		Color tint = parseColor("tint", params);
@@ -311,7 +330,7 @@ std::map<std::string, CommandFunction> s_cmds = {
 			return Color(c) * tint;
 		}, op);
 	}},
-	{ "circle", [](Image& dst, CompositeFunction op, const Json& params) {
+	{ "circle", [](Image& dst, CompositeFunction op, const Json& params, Generator&) {
 		vec2 pos = parseVec2("pos", params, vec2(dst.w * 0.5f, dst.h * 0.5f));
 		float r = parseFloat("radius", params, glm::max(dst.w * 0.5f, dst.h * 0.5f));
 		Color tint = parseColor("tint", params);
@@ -320,7 +339,7 @@ std::map<std::string, CommandFunction> s_cmds = {
 			return Color(c) * tint;
 		}, op);
 	}},
-	{ "calc", [](Image& dst, CompositeFunction op, const Json& params) {
+	{ "calc", [](Image& dst, CompositeFunction op, const Json& params, Generator&) {
 		Color tint = parseColor("tint", params);
 		double w = dst.w, h = dst.h;
 		const Json& exprParam = params["expr"];
@@ -365,11 +384,18 @@ static const std::vector<Op> s_ops = {
 };
 
 void Generator::processCommand(const Json &cmd) {
+	// Check special stuff
+	if (cmd["save"].is_string()) {
+		const std::string& name = cmd["save"].string_value();
+		namedImages[name] = image;
+		return;
+	}
+	// Check composite operators
 	for (const auto& op : s_ops) {
 		if (!cmd[op.name].is_null()) {
 			const std::string& genFunc = cmd[op.name].string_value();
 			//std::cout << "Applying " << gen << " with " << op.name << std::endl;
-			s_cmds[genFunc](image, op.op, cmd);
+			s_cmds[genFunc](image, op.op, cmd, *this);
 			break;
 		}
 	}

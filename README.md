@@ -87,6 +87,7 @@ Each operation in the `ops` array must have a key that determines how the result
 * `div`: divide old pixel values by the new ones
 * `min`: pick smallest of the values, in each color channel
 * `max`: pick largest of the values, in each color channel
+* `save`: special, store the current image, named with the given string value for later use
 
 **Available values (generator functions):**
 
@@ -103,6 +104,9 @@ Almost all generators take an optional `tint` parameter which is a color that is
 	* `size`: how big the new "pixels" are
 * `boxblur`: blur using a box filter
 	* `radius`: radius(es) of the box kernel to use (can specify separately for x/y axes)
+* `blend`: blend between the current state and another saved image state
+	* `other`: string naming the image to blend with, must be used previously in `save` command
+	* `alpha`: blend factor between 0-1, near 0 is mostly current state, near 1 means mostly the other state
 * `noise`: random non-coherent white noise
 * `simplex`: coherent simplex noise
 * `perlin`: coherent perlin noise
