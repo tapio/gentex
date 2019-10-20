@@ -4,6 +4,7 @@
 #include <map>
 #include <functional>
 
+#define _USE_MATH_DEFINES
 #define GLM_FORCE_CXX11
 #include <glm/glm.hpp>
 #include <glm/gtc/noise.hpp>

@@ -81,7 +81,12 @@ struct ColorInterpolator {
 		// TODO: More error checking
 		if (params["colors"].is_array()) {
 			const auto& colors = params["colors"].array_items();
+#ifdef _MSC_VER
+			float fstops[64];
+			assert(colors.size() <= 64);
+#else
 			float fstops[colors.size()];
+#endif
 			for (uint i = 0; i < colors.size(); ++i)
 				fstops[i] = i / (colors.size() - 1.f);
 			if (params["stops"].is_array()) {

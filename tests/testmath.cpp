@@ -4,6 +4,8 @@
 // Use of this source code is governed by the BSD 2-Clause License that can be
 // found in the LICENSE file.
 
+#define _USE_MATH_DEFINES
+
 #include <string>
 #include <iostream>
 #include <chrono>

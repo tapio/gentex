@@ -6,6 +6,7 @@
 
 #include "shunting-yard.hpp"
 
+#define _USE_MATH_DEFINES
 #include <ctype.h>
 #include <math.h>
 #include <stdio.h>
