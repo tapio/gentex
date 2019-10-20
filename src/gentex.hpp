@@ -4,12 +4,9 @@
 #include <map>
 #include <functional>
 
-#define _USE_MATH_DEFINES
-#define GLM_FORCE_CXX11
-#include <glm/glm.hpp>
-#include <glm/gtc/noise.hpp>
-
 #include <json11/json11.hpp>
+
+#include "math.hpp"
 
 namespace gentex {
 
@@ -17,16 +14,8 @@ namespace gentex {
 	class Generator;
 
 	typedef unsigned int uint;
-	typedef glm::vec3 Color;
-	using glm::vec2;
-	using glm::vec3;
-	using glm::vec4;
+	typedef vec3 Color;
 	using json11::Json;
-	using glm::min;
-	using glm::max;
-	using glm::exp;
-	using glm::pow;
-	using glm::clamp;
 
 	typedef std::function<Color(Color, Color)> CompositeFunction;
 	typedef std::function<Color(int, int, Color)> FilterFunction;

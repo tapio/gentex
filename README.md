@@ -11,7 +11,6 @@ Parts of the project are inspired by mrdoob's [texgen.js](https://github.com/mrd
 * constant color
 * random non-coherent noise
 * perlin noise
-* simplex noise
 * fractal Brownian motion (fBm)
 * gradient / gradient mapping
 * sin

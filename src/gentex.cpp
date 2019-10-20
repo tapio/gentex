@@ -9,7 +9,19 @@
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include "stb/stb_image_write.h"
 
+#define STB_PERLIN_IMPLEMENTATION
+#include "stb/stb_perlin.h"
+
 namespace gentex {
+
+inline float perlin(vec2 p, vec2 period = {}) {
+	return stb_perlin_noise3(p.x, p.y, 0, period.x, period.y, 0);
+}
+
+// TODO: No simplex...
+inline float simplex(vec2 p) {
+	return stb_perlin_noise3(p.x, p.y, 0.5f, 0, 0, 0);
+}
 
 inline float rnd() { return rand() / (float)RAND_MAX; }
 
@@ -201,13 +213,14 @@ std::map<std::string, CommandFunction> s_cmds = {
 		Color tint = parseColor("tint", params);
 		dst.filter([density, sharpness, tint](int, int, Color color) {
 			Color c = max(color - density, Color(0.f));
-			return (1.f - glm::pow(Color(sharpness), c)) * tint;
+			Color p = { std::pow(sharpness, c.x), std::pow(sharpness, c.y), std::pow(sharpness, c.z) };
+			return (Color(1.f) - p) * tint;
 		}, op);
 	}},
 	{ "inv", [](Image& dst, CompositeFunction op, const Json& params, Generator&) {
 		Color tint = parseColor("tint", params);
 		dst.filter([tint](int, int, Color color) {
-			return (1.f - color) * tint;
+			return (Color(1.f) - color) * tint;
 		}, op);
 	}},
 	{ "clamp", [](Image& dst, CompositeFunction op, const Json& params, Generator&) {
@@ -251,11 +264,11 @@ std::map<std::string, CommandFunction> s_cmds = {
 	}},
 	{ "gradientr", [](Image& dst, CompositeFunction op, const Json& params, Generator&) {
 		vec2 pos = parseVec2("pos", params, vec2(dst.w * 0.5f, dst.h * 0.5f));
-		float r = parseFloat("radius", params, glm::max(dst.w * 0.5f, dst.h * 0.5f));
+		float r = parseFloat("radius", params, max(dst.w * 0.5f, dst.h * 0.5f));
 		Color tint = parseColor("tint", params);
 		ColorInterpolator interp(params);
 		dst.composite([=, &interp](int x, int y) {
-			float rpos = glm::clamp(glm::distance(pos, vec2(x, y)) / r, 0.f, 1.f);
+			float rpos = clamp(distance(pos, vec2(x, y)) / r, 0.f, 1.f);
 			return interp.get(Color(rpos)) * tint;
 		}, op);
 	}},
@@ -288,42 +301,42 @@ std::map<std::string, CommandFunction> s_cmds = {
 		}
 	}},
 	{ "sin", [](Image& dst, CompositeFunction op, const Json& params, Generator&) {
-		vec2 freq = parseVec2("freq", params, vec2(1.f)) * (float)M_PI;
+		vec2 freq = parseVec2("freq", params, vec2(1.f)) * PI;
 		vec2 offset = parseVec2("offset", params, vec2(0.f));
 		Color tint = parseColor("tint", params);
 		dst.composite([=](int x, int y) {
-			vec2 s = sin((vec2(x, y) + offset) * freq);
-			return op(s.x * tint, s.y * tint);
+			vec2 s = (vec2(x, y) + offset) * freq;
+			return op(tint * std::sin(s.x), tint * std::sin(s.y));
 		}, op);
 	}},
 	{ "sinx", [](Image& dst, CompositeFunction op, const Json& params, Generator&) {
-		float freq = params["freq"].number_value() * M_PI;
+		float freq = params["freq"].number_value() * PI;
 		float offset = params["offset"].number_value();
 		Color tint = parseColor("tint", params);
 		dst.composite([=](int x, int) {
-			return std::sin((x + offset) * freq) * tint;
+			return tint * std::sin((x + offset) * freq);
 		}, op);
 	}},
 	{ "siny", [](Image& dst, CompositeFunction op, const Json& params, Generator&) {
-		float freq = params["freq"].number_value() * M_PI;
+		float freq = params["freq"].number_value() * PI;
 		float offset = params["offset"].number_value();
 		Color tint = parseColor("tint", params);
 		dst.composite([=](int, int y) {
-			return std::sin((y + offset) * freq) * tint;
+			return tint * std::sin((y + offset) * freq);
 		}, op);
 	}},
 	{ "or", [](Image& dst, CompositeFunction op, const Json& params, Generator&) {
 		float w = dst.w;
 		Color tint = parseColor("tint", params);
 		dst.composite([w, tint](int x, int y) {
-			return ((x | y) / w) * tint;
+			return tint * ((x | y) / w);
 		}, op);
 	}},
 	{ "xor", [](Image& dst, CompositeFunction op, const Json& params, Generator&) {
 		float w = dst.w;
 		Color tint = parseColor("tint", params);
 		dst.composite([w, tint](int x, int y) {
-			return ((x ^ y) / w) * tint;
+			return tint * ((x ^ y) / w);
 		}, op);
 	}},
 	{ "rect", [](Image& dst, CompositeFunction op, const Json& params, Generator&) {
@@ -337,10 +350,10 @@ std::map<std::string, CommandFunction> s_cmds = {
 	}},
 	{ "circle", [](Image& dst, CompositeFunction op, const Json& params, Generator&) {
 		vec2 pos = parseVec2("pos", params, vec2(dst.w * 0.5f, dst.h * 0.5f));
-		float r = parseFloat("radius", params, glm::max(dst.w * 0.5f, dst.h * 0.5f));
+		float r = parseFloat("radius", params, max(dst.w * 0.5f, dst.h * 0.5f));
 		Color tint = parseColor("tint", params);
 		dst.composite([pos, r, tint](int x, int y) {
-			float c = glm::distance(pos, vec2(x, y)) <= r ? 1.f : 0.f;
+			float c = distance(pos, vec2(x, y)) <= r ? 1.f : 0.f;
 			return Color(c) * tint;
 		}, op);
 	}},
