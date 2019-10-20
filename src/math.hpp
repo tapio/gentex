@@ -43,17 +43,17 @@ struct vec2
 	constexpr vec2 operator*(float rhs) const { return { x * rhs, y * rhs }; }
 	constexpr vec2 operator/(float rhs) const { return { x / rhs, y / rhs }; }
 
-	constexpr vec2& operator+=(const vec2& rhs) { x += rhs.x; y += rhs.y; return *this; }
-	constexpr vec2& operator-=(const vec2& rhs) { x -= rhs.x; y -= rhs.y; return *this; }
-	constexpr vec2& operator*=(const vec2& rhs) { x *= rhs.x; y *= rhs.y; return *this; }
-	constexpr vec2& operator/=(const vec2& rhs) { x /= rhs.x; y /= rhs.y; return *this; }
-	constexpr vec2& operator*=(float rhs) { x *= rhs; y *= rhs; return *this; }
-	constexpr vec2& operator/=(float rhs) { x /= rhs; y /= rhs; return *this; }
+	vec2& operator+=(const vec2& rhs) { x += rhs.x; y += rhs.y; return *this; }
+	vec2& operator-=(const vec2& rhs) { x -= rhs.x; y -= rhs.y; return *this; }
+	vec2& operator*=(const vec2& rhs) { x *= rhs.x; y *= rhs.y; return *this; }
+	vec2& operator/=(const vec2& rhs) { x /= rhs.x; y /= rhs.y; return *this; }
+	vec2& operator*=(float rhs) { x *= rhs; y *= rhs; return *this; }
+	vec2& operator/=(float rhs) { x /= rhs; y /= rhs; return *this; }
 
 	constexpr bool operator==(const vec2& rhs) const { return x == rhs.x && y == rhs.y; }
 	constexpr bool operator!=(const vec2& rhs) const { return !(*this == rhs); }
 
-	constexpr vec2& operator-() { x = -x; y = -y; return *this; }
+	vec2& operator-() { x = -x; y = -y; return *this; }
 	constexpr float operator[](int index) { return v[index]; }
 };
 
@@ -76,17 +76,17 @@ struct vec3
 	constexpr vec3 operator*(float rhs) const { return { x * rhs, y * rhs, z * rhs }; }
 	constexpr vec3 operator/(float rhs) const { return { x / rhs, y / rhs, z / rhs }; }
 
-	constexpr vec3& operator+=(const vec3& rhs) { x += rhs.x; y += rhs.y; z += rhs.z; return *this; }
-	constexpr vec3& operator-=(const vec3& rhs) { x -= rhs.x; y -= rhs.y; z -= rhs.z; return *this; }
-	constexpr vec3& operator*=(const vec3& rhs) { x *= rhs.x; y *= rhs.y; z *= rhs.z; return *this; }
-	constexpr vec3& operator/=(const vec3& rhs) { x /= rhs.x; y /= rhs.y; z /= rhs.z; return *this; }
-	constexpr vec3& operator*=(float rhs) { x *= rhs; y *= rhs; z *= rhs; return *this; }
-	constexpr vec3& operator/=(float rhs) { x /= rhs; y /= rhs; z /= rhs; return *this; }
+	vec3& operator+=(const vec3& rhs) { x += rhs.x; y += rhs.y; z += rhs.z; return *this; }
+	vec3& operator-=(const vec3& rhs) { x -= rhs.x; y -= rhs.y; z -= rhs.z; return *this; }
+	vec3& operator*=(const vec3& rhs) { x *= rhs.x; y *= rhs.y; z *= rhs.z; return *this; }
+	vec3& operator/=(const vec3& rhs) { x /= rhs.x; y /= rhs.y; z /= rhs.z; return *this; }
+	vec3& operator*=(float rhs) { x *= rhs; y *= rhs; z *= rhs; return *this; }
+	vec3& operator/=(float rhs) { x /= rhs; y /= rhs; z /= rhs; return *this; }
 
 	constexpr bool operator==(const vec3& rhs) const { return x == rhs.x && y == rhs.y && z == rhs.z; }
 	constexpr bool operator!=(const vec3& rhs) const { return !(*this == rhs); }
 
-	constexpr vec3& operator-() { x = -x; y = -y; z = -z; return *this; }
+	vec3& operator-() { x = -x; y = -y; z = -z; return *this; }
 	constexpr float operator[](int index) { return v[index]; }
 };
 
@@ -109,17 +109,17 @@ struct vec4
 	constexpr vec4 operator*(float rhs) const { return { x * rhs, y * rhs, z * rhs, w * rhs }; }
 	constexpr vec4 operator/(float rhs) const { return { x / rhs, y / rhs, z / rhs, w / rhs }; }
 
-	constexpr vec4& operator+=(const vec4& rhs) { x += rhs.x; y += rhs.y; z += rhs.z; w += rhs.w; return *this; }
-	constexpr vec4& operator-=(const vec4& rhs) { x -= rhs.x; y -= rhs.y; z -= rhs.z; w -= rhs.w; return *this; }
-	constexpr vec4& operator*=(const vec4& rhs) { x *= rhs.x; y *= rhs.y; z *= rhs.z; w *= rhs.w; return *this; }
-	constexpr vec4& operator/=(const vec4& rhs) { x /= rhs.x; y /= rhs.y; z /= rhs.z; w /= rhs.w; return *this; }
-	constexpr vec4& operator*=(float rhs) { x *= rhs; y *= rhs; z *= rhs; w *= rhs; return *this; }
-	constexpr vec4& operator/=(float rhs) { x /= rhs; y /= rhs; z /= rhs; w /= rhs; return *this; }
+	vec4& operator+=(const vec4& rhs) { x += rhs.x; y += rhs.y; z += rhs.z; w += rhs.w; return *this; }
+	vec4& operator-=(const vec4& rhs) { x -= rhs.x; y -= rhs.y; z -= rhs.z; w -= rhs.w; return *this; }
+	vec4& operator*=(const vec4& rhs) { x *= rhs.x; y *= rhs.y; z *= rhs.z; w *= rhs.w; return *this; }
+	vec4& operator/=(const vec4& rhs) { x /= rhs.x; y /= rhs.y; z /= rhs.z; w /= rhs.w; return *this; }
+	vec4& operator*=(float rhs) { x *= rhs; y *= rhs; z *= rhs; w *= rhs; return *this; }
+	vec4& operator/=(float rhs) { x /= rhs; y /= rhs; z /= rhs; w /= rhs; return *this; }
 
 	constexpr bool operator==(const vec4& rhs) const { return x == rhs.x && y == rhs.y && z == rhs.z && w == rhs.w; }
 	constexpr bool operator!=(const vec4& rhs) const { return !(*this == rhs); }
 
-	constexpr vec4& operator-() { x = -x; y = -y; z = -z; w = -w; return *this; }
+	vec4& operator-() { x = -x; y = -y; z = -z; w = -w; return *this; }
 	constexpr float operator[](int index) { return v[index]; }
 };
 
