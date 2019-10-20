@@ -25,6 +25,7 @@ namespace gentex {
 	using glm::max;
 	using glm::exp;
 	using glm::pow;
+	using glm::clamp;
 
 	typedef std::function<Color(Color, Color)> CompositeFunction;
 	typedef std::function<Color(int, int, Color)> FilterFunction;
@@ -52,17 +53,15 @@ namespace gentex {
 		Image() {}
 
 		Color sample(float u, float v) const {
-			return get(u / w, v / h);
+			return get(u * (w - 1), v * (h - 1));
 		}
 
 		Color sampleClamp(float u, float v) const {
-			u = u < 0 ? 0 : (u > 1.0 ? 1.0 : u);
-			v = v < 0 ? 0 : (v > 1.0 ? 1.0 : v);
-			return get(u / w, v / h);
+			return sample(clamp(u, 0.f, 1.f), clamp(v, 0.f, 1.f));
 		}
 
 		Color sampleRepeat(float u, float v) const {
-			return get(int(u / w) % w, int(v / h) % h);
+			return get(int(u * (w - 1)) % w, int(v * (h - 1)) % h);
 		}
 
 		Color get(int x, int y) const {
@@ -70,9 +69,7 @@ namespace gentex {
 		}
 
 		Color getClamp(int x, int y) const {
-			x = x < 0 ? 0 : (x > w ? w : x);
-			y = y < 0 ? 0 : (y > h ? h : y);
-			return get(x, y);
+			return get(clamp(x, 0, w - 1), clamp(y, 0, h - 1));
 		}
 
 		Color getRepeat(int x, int y) const {
