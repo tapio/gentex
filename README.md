@@ -50,7 +50,7 @@ See more examples in the tests-directory.
 
 ## Building
 
-You need CMake and a C++11 compiler such as g++ 4.9 or clang++ 3.5. A couple of needed third-party libraries are included in the repository so there are no additional dependencies.
+You need CMake and a C++14 compiler such as g++ 4.9 or clang++ 3.7. A couple of needed third-party libraries are included in the repository so there are no additional dependencies.
 
 	mkdir build
 	cd build
